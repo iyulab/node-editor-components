@@ -1,43 +1,38 @@
-import { html, LitElement, nothing } from "lit";
+import { html, nothing } from "lit";
 import { property } from "lit/decorators.js";
 import { createRef, ref, type Ref } from "lit/directives/ref.js";
 
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
 
+import { UElement } from "@iyulab/components/internals/UElement.js";
 import { styles } from './RichTextEditor.styles.js';
 
-export class RichTextEditor extends LitElement {
-  static styles = [styles];
+export class RichTextEditor extends UElement {
+  static styles = [ styles ];
+  static dependencies: Record<string, typeof UElement> = {};
 
   private container: Ref<HTMLElement> = createRef();
   private quill!: Quill;
   private observer: MutationObserver = new MutationObserver(() => {
-    const theme = document.documentElement.classList.contains("sl-theme-dark") ? "dark" : "light";
+    const theme = document.documentElement.classList.contains("theme") ? "dark" : "light";
     if (this.theme !== theme) this.theme = theme;
   });
 
   /** Specifies whether the header should be displayed or not. @default false */
   @property({ type: Boolean, reflect: true }) noHeader: boolean = false;
-
   /** The label text displayed in the header of the rich text editor. @default "Rich Text Editor" */
   @property({ type: String }) label: string = "Rich Text Editor";
-  
   /** The visual theme of the editor. Can be "light" or "dark". @default "light" */
-  @property({ type: String }) theme: "light" | "dark" = "light"; 
-  
+  @property({ type: String }) theme: "light" | "dark" = "light";   
   /** Whether the editor should be in read-only mode, preventing user input. @default false */
   @property({ type: Boolean }) readOnly: boolean = false;
-  
   /** The placeholder text shown when the editor is empty. @default "Start writing..." */
-  @property({ type: String }) placeholder: string = "Start writing...";
-  
+  @property({ type: String }) placeholder: string = "Start writing...";  
   /** The current HTML content of the rich text editor. @default "" */
   @property({ type: String }) value: string = "";
-
   /** The height of the editor in pixels. @default 300 */
   @property({ type: Number }) height: number = 300;
-
   /** Custom toolbar configuration. If not provided, uses default toolbar. */
   @property({ type: Array }) toolbar?: string[][];
   
@@ -132,6 +127,30 @@ export class RichTextEditor extends LitElement {
     }
   }
 
+  render() {
+    return html`
+      ${this.renderHeader()}
+      <div class="editor" style="height: ${this.height}px;">
+        <div class="quill-container" ${ref(this.container)}></div>
+      </div>
+    `;
+  }
+
+  private renderHeader() {
+    if (this.noHeader) return nothing;
+    return html`
+      <div class="header">
+        <slot name="header-prefix"></slot>
+        <div class="title">${this.label}</div>
+        <div class="flex"></div>
+        <slot name="header-actions"></slot>
+        <sl-button size="small" variant="text" @click=${this.handleCopy}>
+          <sl-icon name="copy"></sl-icon>
+        </sl-button>
+      </div>
+    `;
+  }
+
   private updateEditorHeight() {
     if (this.quill) {
       const editorElement = this.shadowRoot?.querySelector('.ql-editor') as HTMLElement;
@@ -196,30 +215,6 @@ export class RichTextEditor extends LitElement {
     if (this.quill) {
       this.quill.focus();
     }
-  }
-
-  render() {
-    return html`
-      ${this.renderHeader()}
-      <div class="editor" style="height: ${this.height}px;">
-        <div class="quill-container" ${ref(this.container)}></div>
-      </div>
-    `;
-  }
-
-  private renderHeader() {
-    if (this.noHeader) return nothing;
-    return html`
-      <div class="header">
-        <slot name="header-prefix"></slot>
-        <div class="title">${this.label}</div>
-        <div class="flex"></div>
-        <slot name="header-actions"></slot>
-        <sl-button size="small" variant="text" @click=${this.handleCopy}>
-          <sl-icon name="copy"></sl-icon>
-        </sl-button>
-      </div>
-    `;
   }
 
   private handleCopy() {

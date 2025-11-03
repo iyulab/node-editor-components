@@ -1,44 +1,42 @@
-import { html, LitElement, nothing, unsafeCSS } from "lit";
+import { html, nothing, unsafeCSS } from "lit";
 import { property } from "lit/decorators.js";
 import { createRef, ref, type Ref } from "lit/directives/ref.js";
 
 import * as monaco from "monaco-editor";
-import monacoStyles from "monaco-editor/min/vs/editor/editor.main.css?inline";
 import "./CodeEditor.worker";
+import monacoStyles from "monaco-editor/min/vs/editor/editor.main.css?inline";
 
+import { UElement } from "@iyulab/components/internals/UElement.js";
 import { styles } from './CodeEditor.styles.js';
 
 /**
  * code editor component used by monaco-editor
  */
-export class CodeEditor extends LitElement {
+export class CodeEditor extends UElement {
   static styles = [ unsafeCSS(monacoStyles), styles ];
+  static dependencies: Record<string, typeof UElement> = {
+    "u-copy-button": (await import("@iyulab/components/src/components/copy-button/CopyButton.js")).CopyButton,
+  };
 
   private container: Ref<HTMLElement> = createRef();
   private editor!: monaco.editor.IStandaloneCodeEditor;
   private observer: MutationObserver = new MutationObserver(() => {
-    const theme = document.documentElement.classList.contains("sl-theme-dark") ? "dark" : "light";
+    const theme = document.documentElement.classList.contains("theme") ? "dark" : "light";
     if (this.theme !== theme) this.theme = theme;
   });
 
   /** Specifies whether the header should be displayed or not. @default false */
   @property({ type: Boolean, reflect: true }) noHeader: boolean = false;
-
   /** The label text displayed in the header of the code editor. @default "Editor" */
   @property({ type: String }) label: string = "Editor";
-  
   /** The visual theme of the code editor. Can be "light" or "dark". @default "light" */
   @property({ type: String }) theme: "light" | "dark" = "light"; 
-  
   /** Whether the editor should be in read-only mode, preventing user input. @default false */
   @property({ type: Boolean }) readOnly: boolean = false;
-  
   /** The programming language for syntax highlighting (e.g., "json", "javascript", "typescript"). @default "json" */
   @property({ type: String }) language: string = "json";
-  
   /** The font size in pixels for the text in the editor. @default 14 */
   @property({ type: Number }) fontSize: number = 14;
-  
   /** The current text content of the code editor. @default "" */
   @property({ type: String }) value: string = "";
   
@@ -118,7 +116,7 @@ export class CodeEditor extends LitElement {
         <div class="title">${this.label}</div>
         <div class="flex"></div>
         <slot name="header-actions"></slot>
-        <sl-copy-button value=${this.value}></sl-copy-button>
+        <u-copy-button value=${this.value}></u-copy-button>
       </div>
     `;
   }
