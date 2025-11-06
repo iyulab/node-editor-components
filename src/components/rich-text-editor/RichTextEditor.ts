@@ -5,7 +5,7 @@ import { createRef, ref, type Ref } from "lit/directives/ref.js";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
 
-import { UElement } from "@iyulab/components/internals/UElement.js";
+import { UElement } from "@iyulab/components/dist/internals/UElement.js";
 import { styles } from './RichTextEditor.styles.js';
 
 export class RichTextEditor extends UElement {

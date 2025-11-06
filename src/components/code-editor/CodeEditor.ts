@@ -6,7 +6,7 @@ import * as monaco from "monaco-editor";
 import "./CodeEditor.worker";
 import monacoStyles from "monaco-editor/min/vs/editor/editor.main.css?inline";
 
-import { UElement } from "@iyulab/components/internals/UElement.js";
+import { UElement } from "@iyulab/components/dist/internals/UElement.js";
 import { styles } from './CodeEditor.styles.js';
 
 /**
@@ -14,9 +14,7 @@ import { styles } from './CodeEditor.styles.js';
  */
 export class CodeEditor extends UElement {
   static styles = [ unsafeCSS(monacoStyles), styles ];
-  static dependencies: Record<string, typeof UElement> = {
-    "u-copy-button": (await import("@iyulab/components/src/components/copy-button/CopyButton.js")).CopyButton,
-  };
+  static dependencies: Record<string, typeof UElement> = {};
 
   private container: Ref<HTMLElement> = createRef();
   private editor!: monaco.editor.IStandaloneCodeEditor;

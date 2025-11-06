@@ -1,60 +1,47 @@
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
-import { resolve, relative } from 'path';
-import pkg from 'glob';
-const { glob } = pkg;
-
-// 모든 TypeScript 파일을 찾아서 entry points로 설정
-const files = glob.sync('src/**/*.ts', { 
-  ignore: ['src/**/*.d.ts', 'src/**/*.test.ts', 'src/**/*.spec.ts'] 
-});
-
-const entries: Record<string, string> = files.reduce((acc: Record<string, string>, file: string) => {
-  const entryName = relative('src', file.slice(0, -3)); // .ts 제거
-  acc[entryName] = resolve(__dirname, file);
-  return acc;
-}, {});
+import { resolve } from 'path';
 
 export default defineConfig({
   // 개발 서버 설정
   server: {
-    open: '/demo.html'
+    open: '/tests/index.html',
+    port: 5174,
   },
   // 빌드 설정
   build: {
     target: 'esnext',
     outDir: 'dist',
     emptyOutDir: true,
-    sourcemap: false,
     lib: {
-      entry: entries,
-      formats: ['es']
+      entry: resolve(__dirname, 'src/index.ts'),
+      formats: ['es'],
+      fileName: (format, entry) => {
+        return format === 'es' ? `${entry}.js` : `${entry}.${format}.js`;
+      }
     },
     rollupOptions: {
       external: [
+        /^@iyulab.*/,
         /^lit.*/,
         /^@lit.*/,
-        'react',
+        /^react.*/,
         'mobx',
-        'quill',
-        'monaco-editor',
         'reflect-metadata',
+        'monaco-editor',
+        'quill',
       ],
       output: {
-        entryFileNames: '[name].js',
-        chunkFileNames: '[name].js',
-        assetFileNames: '[name].[ext]',
+        preserveModulesRoot: 'src',
         preserveModules: true,
-        preserveModulesRoot: 'src'
+        assetFileNames: 'assets/[name]-[hash].[extname]',
+        chunkFileNames: 'chunks/[name]-[hash].js',
       }
     }
   },
   plugins: [
     dts({
-      include: ["src/**/*"],
-      insertTypesEntry: true,
-      rollupTypes: false,
-      copyDtsFiles: true,
+      include: ["src/**/*"]
     })
   ]
 })
