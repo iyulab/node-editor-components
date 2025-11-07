@@ -26,7 +26,6 @@ export default defineConfig({
         /^lit.*/,
         /^@lit.*/,
         /^react.*/,
-        'mobx',
         'reflect-metadata',
         'monaco-editor',
         'quill',
