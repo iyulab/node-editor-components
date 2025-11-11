@@ -5,12 +5,12 @@ import { createRef, ref, type Ref } from "lit/directives/ref.js";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
 
-import { UElement } from "@iyulab/components/dist/internals/UElement.js";
+import { BaseElement } from "@iyulab/components/dist/components/BaseElement.js";
 import { styles } from './RichTextEditor.styles.js';
 
-export class RichTextEditor extends UElement {
+export class RichTextEditor extends BaseElement {
   static styles = [ styles ];
-  static dependencies: Record<string, typeof UElement> = {};
+  static dependencies: Record<string, typeof BaseElement> = {};
 
   private container: Ref<HTMLElement> = createRef();
   private quill!: Quill;

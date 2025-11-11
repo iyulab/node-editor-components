@@ -6,15 +6,15 @@ import * as monaco from "monaco-editor";
 import "./CodeEditor.worker";
 import monacoStyles from "monaco-editor/min/vs/editor/editor.main.css?inline";
 
-import { UElement } from "@iyulab/components/dist/internals/UElement.js";
+import { BaseElement } from "@iyulab/components/dist/components/BaseElement.js";
 import { styles } from './CodeEditor.styles.js';
 
 /**
  * code editor component used by monaco-editor
  */
-export class CodeEditor extends UElement {
+export class CodeEditor extends BaseElement {
   static styles = [ unsafeCSS(monacoStyles), styles ];
-  static dependencies: Record<string, typeof UElement> = {};
+  static dependencies: Record<string, typeof BaseElement> = {};
 
   private container: Ref<HTMLElement> = createRef();
   private editor!: monaco.editor.IStandaloneCodeEditor;
