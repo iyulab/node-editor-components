@@ -1,18 +1,31 @@
 {
   "name": "@iyulab/editor-components",
-  "description": "iyulab editor components",
+  "description": "various editor components by iyulab",
   "version": "0.0.1",
-  "author": {
-    "name": "iyulab",
-    "url": "https://www.iyulab.com"
-  },
+  "keywords": [
+    "iyulab",
+    "web-components",
+    "lit-element"
+  ],
   "license": "MIT",
+  "author": "iyulab",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iyulab/node-editor-components.git"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "package.json"
+  ],
   "type": "module",
-  "types": "./dist/index.d.ts",
+  "types": "./src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
     }
   },
   "scripts": {
@@ -20,16 +33,15 @@
     "build": "eslint && vite build"
   },
   "dependencies": {
-    "@iyulab/components": "0.0.3",
-    "@lit/react": "^1.0.8",
+    "@iyulab/components": "0.1.0",
     "lit": "^3.3.1",
     "monaco-editor": "^0.54.0",
-    "quill": "^2.0.3",
-    "react": "^19.2.0"
+    "quill": "^2.0.3"
   },
   "devDependencies": {
+    "@lit/react": "^1.0.8",
     "@eslint/js": "^9.39.1",
-    "@types/node": "^24.10.0",
+    "@types/node": "^24.10.1",
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
     "typescript": "^5.9.3",
