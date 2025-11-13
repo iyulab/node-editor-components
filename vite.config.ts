@@ -13,8 +13,12 @@ export default defineConfig({
     target: 'esnext',
     outDir: 'dist',
     emptyOutDir: true,
+    copyPublicDir: false,
+    minify: false,
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: [
+        resolve(__dirname, 'src/index.ts'),
+      ],
       formats: ['es'],
       fileName: (format, entry) => {
         return format === 'es' ? `${entry}.js` : `${entry}.${format}.js`;
@@ -24,17 +28,12 @@ export default defineConfig({
       external: [
         /^@iyulab.*/,
         /^lit.*/,
-        /^@lit.*/,
-        /^react.*/,
-        'reflect-metadata',
         'monaco-editor',
         'quill',
       ],
       output: {
-        preserveModulesRoot: 'src',
         preserveModules: true,
-        assetFileNames: 'assets/[name]-[hash].[extname]',
-        chunkFileNames: 'chunks/[name]-[hash].js',
+        preserveModulesRoot: 'src',
       }
     }
   },
