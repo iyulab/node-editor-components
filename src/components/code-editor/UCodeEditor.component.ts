@@ -3,16 +3,16 @@ import { property } from "lit/decorators.js";
 import { createRef, ref, type Ref } from "lit/directives/ref.js";
 
 import * as monaco from "monaco-editor";
-import "./CodeEditor.worker";
+import "./UCodeEditor.worker.js";
 import monacoStyles from "monaco-editor/min/vs/editor/editor.main.css?inline";
 
 import { BaseElement } from "@iyulab/components/dist/components/BaseElement.js";
-import { styles } from './CodeEditor.styles.js';
+import { styles } from './UCodeEditor.styles.js';
 
 /**
  * code editor component used by monaco-editor
  */
-export class CodeEditor extends BaseElement {
+export class UCodeEditor extends BaseElement {
   static styles = [ unsafeCSS(monacoStyles), styles ];
   static dependencies: Record<string, typeof BaseElement> = {};
 

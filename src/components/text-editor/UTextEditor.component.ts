@@ -5,18 +5,19 @@ import { createRef, ref, type Ref } from "lit/directives/ref.js";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
 
+import { theme } from "@iyulab/components/dist/utilities/theme.js";
 import { BaseElement } from "@iyulab/components/dist/components/BaseElement.js";
-import { styles } from './RichTextEditor.styles.js';
+import { styles } from './UTextEditor.styles.js';
 
-export class RichTextEditor extends BaseElement {
-  static styles = [ styles ];
+export class UTextEditor extends BaseElement {
+  static styles = [ super.styles, styles ];
   static dependencies: Record<string, typeof BaseElement> = {};
 
   private container: Ref<HTMLElement> = createRef();
   private quill!: Quill;
   private observer: MutationObserver = new MutationObserver(() => {
-    const theme = document.documentElement.classList.contains("theme") ? "dark" : "light";
-    if (this.theme !== theme) this.theme = theme;
+    const currentTheme = theme.get();
+    if (this.theme !== currentTheme) this.theme = currentTheme;
   });
 
   /** Specifies whether the header should be displayed or not. @default false */
@@ -24,7 +25,7 @@ export class RichTextEditor extends BaseElement {
   /** The label text displayed in the header of the rich text editor. @default "Rich Text Editor" */
   @property({ type: String }) label: string = "Rich Text Editor";
   /** The visual theme of the editor. Can be "light" or "dark". @default "light" */
-  @property({ type: String }) theme: "light" | "dark" = "light";   
+  @property({ type: String }) theme?: "light" | "dark" | "system" = "light";   
   /** Whether the editor should be in read-only mode, preventing user input. @default false */
   @property({ type: Boolean }) readOnly: boolean = false;
   /** The placeholder text shown when the editor is empty. @default "Start writing..." */
