@@ -1,23 +1,23 @@
-import { html, nothing } from "lit";
+import { html, nothing, unsafeCSS } from "lit";
 import { property } from "lit/decorators.js";
 import { createRef, ref, type Ref } from "lit/directives/ref.js";
 
 import Quill from "quill";
-import "quill/dist/quill.snow.css";
+import quillStyles from "quill/dist/quill.snow.css?inline";
 
-import { theme } from "@iyulab/components/dist/utilities/theme.js";
+import { Theme } from "@iyulab/components/dist/utilities/Theme.js";
 import { BaseElement } from "@iyulab/components/dist/components/BaseElement.js";
 import { styles } from './UTextEditor.styles.js';
 
 export class UTextEditor extends BaseElement {
-  static styles = [ super.styles, styles ];
+  static styles = [ super.styles, unsafeCSS(quillStyles), styles ];
   static dependencies: Record<string, typeof BaseElement> = {};
 
   private container: Ref<HTMLElement> = createRef();
   private quill!: Quill;
   private observer: MutationObserver = new MutationObserver(() => {
-    const currentTheme = theme.get();
-    if (this.theme !== currentTheme) this.theme = currentTheme;
+    const theme = Theme.get();
+    if (this.theme !== theme) this.theme = theme;
   });
 
   /** Specifies whether the header should be displayed or not. @default false */
@@ -39,9 +39,10 @@ export class UTextEditor extends BaseElement {
   
   connectedCallback() {
     super.connectedCallback();
-    this.theme = document.documentElement.classList.contains("sl-theme-dark") ? "dark" : "light";
+    this.theme = Theme.get();
     this.observer.observe(document.documentElement, { 
-      attributes: true, attributeFilter: ["class"]
+      attributes: true, 
+      attributeFilter: ["data-theme"]
     });
   }
 

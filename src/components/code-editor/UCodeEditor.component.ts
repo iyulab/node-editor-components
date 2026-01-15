@@ -6,6 +6,7 @@ import * as monaco from "monaco-editor";
 import "./UCodeEditor.worker.js";
 import monacoStyles from "monaco-editor/min/vs/editor/editor.main.css?inline";
 
+import { Theme } from "@iyulab/components/dist/utilities/Theme.js";
 import { BaseElement } from "@iyulab/components/dist/components/BaseElement.js";
 import { styles } from './UCodeEditor.styles.js';
 
@@ -13,13 +14,13 @@ import { styles } from './UCodeEditor.styles.js';
  * code editor component used by monaco-editor
  */
 export class UCodeEditor extends BaseElement {
-  static styles = [ unsafeCSS(monacoStyles), styles ];
+  static styles = [ super.styles, unsafeCSS(monacoStyles), styles ];
   static dependencies: Record<string, typeof BaseElement> = {};
 
   private container: Ref<HTMLElement> = createRef();
   private editor!: monaco.editor.IStandaloneCodeEditor;
   private observer: MutationObserver = new MutationObserver(() => {
-    const theme = document.documentElement.classList.contains("theme") ? "dark" : "light";
+    const theme = Theme.get() === "dark" ? "dark" : "light";
     if (this.theme !== theme) this.theme = theme;
   });
 
@@ -40,9 +41,10 @@ export class UCodeEditor extends BaseElement {
   
   connectedCallback() {
     super.connectedCallback();
-    this.theme = document.documentElement.classList.contains("sl-theme-dark") ? "dark" : "light";
+    this.theme = Theme.get() === "dark" ? "dark" : "light";
     this.observer.observe(document.documentElement, { 
-      attributes: true, attributeFilter: ["class"]
+      attributes: true, 
+      attributeFilter: ["data-theme"]
     });
   }
 
