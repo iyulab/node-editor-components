@@ -1,4 +1,4 @@
-import { html, nothing, unsafeCSS } from "lit";
+﻿import { html, nothing, unsafeCSS } from "lit";
 import { property } from "lit/decorators.js";
 import { createRef, ref, type Ref } from "lit/directives/ref.js";
 
@@ -6,12 +6,12 @@ import Quill from "quill";
 import quillStyles from "quill/dist/quill.snow.css?inline";
 
 import { Theme } from "@iyulab/components/dist/utilities/Theme.js";
-import { BaseElement } from "@iyulab/components/dist/components/BaseElement.js";
+import { UElement } from "@iyulab/components/dist/components/UElement.js";
 import { styles } from './UTextEditor.styles.js';
 
-export class UTextEditor extends BaseElement {
+export class UTextEditor extends UElement {
   static styles = [ super.styles, unsafeCSS(quillStyles), styles ];
-  static dependencies: Record<string, typeof BaseElement> = {};
+  static dependencies: Record<string, typeof UElement> = {};
 
   private container: Ref<HTMLElement> = createRef();
   private quill!: Quill;

@@ -1,4 +1,4 @@
-import { html, nothing, unsafeCSS } from "lit";
+﻿import { html, nothing, unsafeCSS } from "lit";
 import { property } from "lit/decorators.js";
 import { createRef, ref, type Ref } from "lit/directives/ref.js";
 
@@ -7,15 +7,15 @@ import "./UCodeEditor.worker.js";
 import monacoStyles from "monaco-editor/min/vs/editor/editor.main.css?inline";
 
 import { Theme } from "@iyulab/components/dist/utilities/Theme.js";
-import { BaseElement } from "@iyulab/components/dist/components/BaseElement.js";
+import { UElement } from "@iyulab/components/dist/components/UElement.js";
 import { styles } from './UCodeEditor.styles.js';
 
 /**
  * code editor component used by monaco-editor
  */
-export class UCodeEditor extends BaseElement {
+export class UCodeEditor extends UElement {
   static styles = [ super.styles, unsafeCSS(monacoStyles), styles ];
-  static dependencies: Record<string, typeof BaseElement> = {};
+  static dependencies: Record<string, typeof UElement> = {};
 
   private container: Ref<HTMLElement> = createRef();
   private editor!: monaco.editor.IStandaloneCodeEditor;
