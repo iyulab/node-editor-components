@@ -37,16 +37,24 @@
     "build": "eslint && vite build"
   },
   "dependencies": {
-    "@iyulab/components": "^0.4.0",
+    "@iyulab/components": "^1.0.0",
     "lit": "^3.3.2",
     "monaco-editor": "^0.55.1",
     "quill": "^2.0.3"
   },
+  "peerDependencies": {
+    "@lit/react": ">=1.0.8",
+    "react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@lit/react": { "optional": true },
+    "react": { "optional": true }
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
-    "@lit/react": "^1.0.8",
     "@types/node": "^25.5.0",
     "eslint": "^9.39.4",
+    "glob": "^13.0.6",
     "globals": "^17.4.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2",

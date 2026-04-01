@@ -9,7 +9,7 @@ export const styles = css`
     overflow: hidden;
     --header-height: 32px;
   }
-  :host([noHeader]) {
+  :host([headless]) {
     --header-height: 0px;
   }
 

@@ -2,14 +2,15 @@ import { LitElement, css, html } from "lit";
 import { customElement } from "lit/decorators.js";
 
 import '../src';
-import { theme } from "@iyulab/components/dist/utilities/theme.js";
+import "@iyulab/components";
+import { Theme } from "@iyulab/components/dist/utilities/Theme.js";
 
 @customElement('preview-app')
 export class PreviewApp extends LitElement {
 
   firstUpdated(changedProperties: any): void {
     super.firstUpdated(changedProperties);
-    theme.init();
+    Theme.init();
   }
 
   render() {
@@ -26,8 +27,8 @@ export class PreviewApp extends LitElement {
   }
 
   toggleTheme() {
-    const currentTheme = theme.get();
-    theme.set(currentTheme === 'dark' ? 'light' : 'dark');
+    const currentTheme = Theme.get();
+    Theme.set(currentTheme === 'dark' ? 'light' : 'dark');
   }
 
   static styles = css`

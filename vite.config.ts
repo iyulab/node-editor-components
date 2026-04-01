@@ -1,6 +1,7 @@
+import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
-import { resolve } from 'path';
+import react from '@iyulab/components/plugins/vite-plugin-react-wrapper.js';
 
 export default defineConfig({
   // 개발 서버 설정
@@ -8,6 +9,7 @@ export default defineConfig({
     open: '/tests/index.html',
     port: 5174,
   },
+  
   // 빌드 설정
   build: {
     target: 'esnext',
@@ -28,8 +30,8 @@ export default defineConfig({
       external: [
         /^@iyulab.*/,
         /^lit.*/,
-        'monaco-editor',
-        'quill',
+        /^monaco-editor.*/,
+        /^quill.*/,
       ],
       output: {
         preserveModules: true,
@@ -40,6 +42,10 @@ export default defineConfig({
   plugins: [
     dts({
       include: ["src/**/*"]
+    }),
+    react({
+      input: 'src/components',
+      output: 'react',
     })
   ]
 })
