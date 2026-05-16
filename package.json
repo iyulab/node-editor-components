@@ -9,6 +9,9 @@
   ],
   "license": "MIT",
   "author": "iyulab",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/iyulab/node-editor-components.git"
