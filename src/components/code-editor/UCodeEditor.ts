@@ -12,6 +12,8 @@ import { styles } from './UCodeEditor.styles.js';
 
 /**
  * code editor component used by monaco-editor
+ * 
+ * @event change - Fired when the content of the editor changes. The event detail contains the current HTML, text, and delta representation of the content.
  */
 @customElement("u-code-editor")
 export class UCodeEditor extends UElement {

@@ -9,6 +9,11 @@ import { Theme } from "@iyulab/components/dist/utilities/Theme.js";
 import { UElement } from "@iyulab/components/dist/components/UElement.js";
 import { styles } from './UTextEditor.styles.js';
 
+/**
+ * A rich text editor component built using Quill.js, providing a customizable and user-friendly interface for text editing. It supports various formatting options, themes, and can be configured to be read-only or editable.
+ * 
+ * @event change - Fired when the content of the editor changes. The event detail includes the current HTML, plain text, and Quill Delta representation of the content.
+ */
 @customElement("u-text-editor")
 export class UTextEditor extends UElement {
   static styles = [ super.styles, unsafeCSS(quillStyles), styles ];
