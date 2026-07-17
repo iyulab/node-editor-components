@@ -90,20 +90,23 @@ export class UTextEditor extends UElement {
       }
     });
 
-    // Set initial content
+    // Set initial content — innerHTML 직접 변이는 Quill MutationObserver가 source='user'로
+    // 오인해 text-change를 발화시키므로, silent source의 setContents로 주입한다.
     if (this.value) {
-      this.quill.root.innerHTML = this.value;
+      this.setQuillContents(this.value);
     }
 
-    // Listen for content changes
-    this.quill.on('text-change', () => {
+    // Listen for content changes — 사용자 편집(source='user')만 change로 노출한다.
+    this.quill.on('text-change', (_delta, _oldDelta, source) => {
+      if (source !== 'user') return;
       const html = this.quill.root.innerHTML;
-      this.dispatchEvent(new CustomEvent("change", { 
-        detail: { 
+      this.value = html;
+      this.dispatchEvent(new CustomEvent("change", {
+        detail: {
           html: html,
           text: this.quill.getText(),
           delta: this.quill.getContents()
-        } 
+        }
       }));
     });
 
@@ -117,7 +120,7 @@ export class UTextEditor extends UElement {
 
     if (this.quill) {
       if (changedProperties.has("value") && this.value !== this.quill.root.innerHTML) {
-        this.quill.root.innerHTML = this.value;
+        this.setQuillContents(this.value);
       }
       
       if (changedProperties.has("readOnly")) {
@@ -132,6 +135,13 @@ export class UTextEditor extends UElement {
         this.updateEditorHeight();
       }
     }
+  }
+
+  /** HTML을 Quill Delta로 변환해 silent source로 주입한다 — 프로그램적 콘텐츠 세팅이
+   *  text-change(→ change 이벤트)로 위장되지 않도록 하기 위함. */
+  private setQuillContents(htmlValue: string) {
+    const delta = this.quill.clipboard.convert({ html: htmlValue });
+    this.quill.setContents(delta, Quill.sources.SILENT);
   }
 
   render() {
@@ -178,29 +188,32 @@ export class UTextEditor extends UElement {
   }
 
   /**
-   * Set content from HTML
+   * Set content from HTML.
+   * 프로그램적 세팅이므로 change 이벤트는 발화하지 않는다 (value 프로퍼티 경로와 동일).
    */
   setHTML(html: string): void {
-    if (this.quill) {
-      this.quill.root.innerHTML = html;
-    }
+    this.value = html;
   }
 
   /**
-   * Set content from Quill Delta
+   * Set content from Quill Delta.
+   * 프로그램적 세팅이므로 change 이벤트는 발화하지 않는다.
    */
   setDelta(delta: any): void {
     if (this.quill) {
-      this.quill.setContents(delta);
+      this.quill.setContents(delta, Quill.sources.SILENT);
+      this.value = this.quill.root.innerHTML;
     }
   }
 
   /**
-   * Clear all content
+   * Clear all content.
+   * 프로그램적 세팅이므로 change 이벤트는 발화하지 않는다.
    */
   clear(): void {
     if (this.quill) {
-      this.quill.setText('');
+      this.quill.setText('', Quill.sources.SILENT);
+      this.value = this.quill.root.innerHTML;
     }
   }
 

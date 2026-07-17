@@ -36,6 +36,9 @@ export class UCodeEditor extends UElement {
   
   private container: Ref<HTMLElement> = createRef();
   private editor?: monaco.editor.IStandaloneCodeEditor;
+  /** 프로그램적 value 동기화 중 여부 — Monaco onDidChangeModelContent는 setValue에서도
+   *  발화하므로, 이 플래그로 프로그램적 변경이 change 이벤트로 위장되는 것을 막는다. */
+  private syncingValue = false;
   private observer: MutationObserver = new MutationObserver(() => {
     const theme = Theme.get() === "dark" ? "dark" : "light";
     if (this.theme !== theme) this.theme = theme;
@@ -77,6 +80,7 @@ export class UCodeEditor extends UElement {
     });
 
     this.editor.onDidChangeModelContent(() => {
+      if (this.syncingValue) return;
       this.value = this.editor!.getValue();
       this.dispatchEvent(new Event("change", {
         bubbles: true,
@@ -91,7 +95,9 @@ export class UCodeEditor extends UElement {
     if (changedProperties.has("value")
       && this.value !== this.editor?.getValue()
       && !this.editor?.hasWidgetFocus()) {
+      this.syncingValue = true;
       this.editor?.setValue(this.value);
+      this.syncingValue = false;
     }
     if (changedProperties.has("theme") && this.editor) {
       this.editor.updateOptions({
