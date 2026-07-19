@@ -1,4 +1,4 @@
-﻿import { html, unsafeCSS } from "lit";
+﻿import { html, unsafeCSS, type PropertyValues } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { createRef, ref, type Ref } from "lit/directives/ref.js";
 
@@ -58,7 +58,7 @@ export class UCodeEditor extends UElement {
     super.disconnectedCallback();
   }
 
-  protected async firstUpdated(changedProperties: any) {
+  protected async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     await this.updateComplete;
       
@@ -89,7 +89,7 @@ export class UCodeEditor extends UElement {
     });
   }
 
-  protected async updated(changedProperties: any) {
+  protected async updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
 
     if (changedProperties.has("value")

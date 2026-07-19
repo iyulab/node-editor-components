@@ -1,8 +1,12 @@
-﻿import { html, unsafeCSS } from "lit";
+﻿import { html, unsafeCSS, type PropertyValues } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { createRef, ref, type Ref } from "lit/directives/ref.js";
 
 import Quill from "quill";
+
+/** Quill 의 Delta 타입. quill-delta 를 직접 의존하지 않고 Quill 시그니처에서 유도한다. */
+type QuillDelta = ReturnType<Quill["getContents"]>;
+type QuillDeltaInput = Parameters<Quill["setContents"]>[0];
 import quillStyles from "quill/dist/quill.snow.css?inline";
 
 import { Theme } from "@iyulab/components/dist/utilities/Theme.js";
@@ -36,7 +40,7 @@ export class UTextEditor extends UElement {
   @property({ type: Array }) toolbar?: string[][];
 
   private container: Ref<HTMLElement> = createRef();
-  private quill!: Quill;
+  private quill: Quill | null = null;
   private observer: MutationObserver = new MutationObserver(() => {
     const theme = Theme.get();
     if (this.theme !== theme) this.theme = theme;
@@ -53,13 +57,13 @@ export class UTextEditor extends UElement {
 
   disconnectedCallback() {
     if (this.quill) {
-      this.quill = null as any;
+      this.quill = null;
     }
     this.observer.disconnect();
     super.disconnectedCallback();
   }
 
-  protected async firstUpdated(changedProperties: any) {
+  protected async firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     await this.updateComplete;
     
@@ -97,15 +101,18 @@ export class UTextEditor extends UElement {
     }
 
     // Listen for content changes — 사용자 편집(source='user')만 change로 노출한다.
-    this.quill.on('text-change', (_delta, _oldDelta, source) => {
+    // 지역 참조를 캡처해, disconnect 후 this.quill 이 null 이 되어도 핸들러가
+    // 안전하게 동작하도록 한다.
+    const quill = this.quill;
+    quill.on('text-change', (_delta, _oldDelta, source) => {
       if (source !== 'user') return;
-      const html = this.quill.root.innerHTML;
+      const html = quill.root.innerHTML;
       this.value = html;
       this.dispatchEvent(new CustomEvent("change", {
         detail: {
           html: html,
-          text: this.quill.getText(),
-          delta: this.quill.getContents()
+          text: quill.getText(),
+          delta: quill.getContents()
         }
       }));
     });
@@ -114,7 +121,7 @@ export class UTextEditor extends UElement {
     this.updateEditorHeight();
   }
 
-  protected async updated(changedProperties: any) {
+  protected async updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
     await this.updateComplete;
 
@@ -140,6 +147,7 @@ export class UTextEditor extends UElement {
   /** HTML을 Quill Delta로 변환해 silent source로 주입한다 — 프로그램적 콘텐츠 세팅이
    *  text-change(→ change 이벤트)로 위장되지 않도록 하기 위함. */
   private setQuillContents(htmlValue: string) {
+    if (!this.quill) return;
     const delta = this.quill.clipboard.convert({ html: htmlValue });
     this.quill.setContents(delta, Quill.sources.SILENT);
   }
@@ -183,7 +191,7 @@ export class UTextEditor extends UElement {
   /**
    * Get the current content as Quill Delta
    */
-  getDelta(): any {
+  getDelta(): QuillDelta | null {
     return this.quill ? this.quill.getContents() : null;
   }
 
@@ -199,7 +207,7 @@ export class UTextEditor extends UElement {
    * Set content from Quill Delta.
    * 프로그램적 세팅이므로 change 이벤트는 발화하지 않는다.
    */
-  setDelta(delta: any): void {
+  setDelta(delta: QuillDeltaInput): void {
     if (this.quill) {
       this.quill.setContents(delta, Quill.sources.SILENT);
       this.value = this.quill.root.innerHTML;

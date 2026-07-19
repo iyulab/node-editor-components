@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.0] - 2026-07-19
+
+### Fixed
+- **`UTextEditor` 가 해제 후 접근에서 깨질 수 있던 타입 거짓말 제거** — `quill` 필드가 `Quill`(non-null 단언)로 선언돼 있는데 `disconnectedCallback` 은 `null as any` 로 null 을 대입하고 있었다. 타입 시스템을 속인 탓에 null 검사 누락 5곳이 가려져 있었다. 필드를 `Quill | null` 로 정직하게 선언하고, `text-change` 핸들러는 생성 시점의 지역 참조를 캡처하도록, `setQuillContents` 는 초기화 전/해제 후 호출을 무시하도록 고쳤다.
+
+### Changed
+- **이 패키지의 eslint 가 실제로 동작하기 시작했다.** `files` 패턴의 확장자 누락과 배열 프리셋 객체 스프레드 결함을 수정했다. `build` 스크립트의 `eslint &&` 게이트는 매칭 파일이 0개라 항상 통과하고 있었다. 위 null 결함은 이 복구로 처음 드러났다.
+- `npm run lint` / `npm run lint:fix` 스크립트 추가.
+- **Delta 타입 정밀화(소비자 영향 가능)**: `getDelta()` 가 `any` → `QuillDelta | null`, `setDelta()` 파라미터가 `any` → `QuillDeltaInput` 으로 좁혀졌다. 두 타입은 `quill-delta` 를 새 의존성으로 들이지 않고 Quill 자체 시그니처(`ReturnType<Quill['getContents']>` 등)에서 유도하므로 Quill 버전 변화를 자동으로 따라간다. `getDelta()` 가 `null` 을 반환할 수 있음이 이제 타입에 드러난다.
+- Lit 생명주기 파라미터(`firstUpdated`/`updated`)의 `any` 를 `PropertyValues` 로, Monaco worker 의 `(self as any)` 를 명시적 인터페이스로 교체.
+
 ## [0.0.2] - 2026-07-17
 
 ### Fixed

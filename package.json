@@ -1,7 +1,7 @@
 {
   "name": "@iyulab/editor-components",
   "description": "various editor components by iyulab",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "keywords": [
     "iyulab",
     "web-components",
@@ -37,6 +37,8 @@
   },
   "scripts": {
     "test": "vite",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
     "build": "eslint && vite build"
   },
   "dependencies": {
