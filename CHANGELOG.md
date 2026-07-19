@@ -1,9 +1,17 @@
 # Changelog
 
+## [0.1.1] - 2026-07-19
+
+### Added
+- **테스트 인프라 도입** — 이 패키지에는 자동 테스트가 없었다(`tests/` 는 수동 preview 앱). 모노레포의 다른 컴포넌트 패키지와 동일한 vitest + playwright 브라우저 스택을 붙이고 `UTextEditor` 생명주기 계약 테스트 5건을 추가했다(mount → 편집 → detach → re-attach, 공개 접근자의 teardown 후 안전성). 기존 `npm test`(preview 앱 실행)는 `npm run preview` 로 이름을 옮겼다.
+
+### Documentation
+- 0.1.0 의 `UTextEditor` 항목 서술을 정정 — "해제 후 접근에서 깨질 수 있던" 이라 썼으나 **실제로는 런타임에 도달하지 않는 경로**였다(호출부가 이미 `if (this.quill)` 로 감싸여 있었다). 타입 정직성 개선의 값은 예방에 있지 live-bug 수정이 아니다. 테스트로 확인한 사실에 맞게 문구를 바로잡았다.
+
 ## [0.1.0] - 2026-07-19
 
 ### Fixed
-- **`UTextEditor` 가 해제 후 접근에서 깨질 수 있던 타입 거짓말 제거** — `quill` 필드가 `Quill`(non-null 단언)로 선언돼 있는데 `disconnectedCallback` 은 `null as any` 로 null 을 대입하고 있었다. 타입 시스템을 속인 탓에 null 검사 누락 5곳이 가려져 있었다. 필드를 `Quill | null` 로 정직하게 선언하고, `text-change` 핸들러는 생성 시점의 지역 참조를 캡처하도록, `setQuillContents` 는 초기화 전/해제 후 호출을 무시하도록 고쳤다.
+- **`UTextEditor` 의 타입 거짓말 제거(예방적)** — `quill` 필드가 `Quill`(non-null 단언)로 선언돼 있는데 `disconnectedCallback` 은 `null as any` 로 null 을 대입하고 있었다. 두 거짓말이 상쇄되어 null 가드 없는 역참조 5곳이 타입 검사를 통과하고 있었다. 필드를 `Quill | null` 로 정직하게 선언하고, `text-change` 핸들러는 생성 시점 지역 참조를 캡처하도록, `setQuillContents` 는 방어 가드를 갖도록 고쳤다. **다만 이는 런타임 버그 수정이 아니다** — 해당 호출부는 모두 `updated()` 의 `if (this.quill)` 안에 있어 실제로는 도달하지 않았다. 값은 앞으로 가드 없는 호출이 추가될 때 tsc 가 즉시 잡아준다는 데 있다.
 
 ### Changed
 - **이 패키지의 eslint 가 실제로 동작하기 시작했다.** `files` 패턴의 확장자 누락과 배열 프리셋 객체 스프레드 결함을 수정했다. `build` 스크립트의 `eslint &&` 게이트는 매칭 파일이 0개라 항상 통과하고 있었다. 위 null 결함은 이 복구로 처음 드러났다.
