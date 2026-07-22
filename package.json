@@ -44,7 +44,7 @@
     "build": "eslint && vite build"
   },
   "dependencies": {
-    "@iyulab/components": "^1.5.1",
+    "@iyulab/components": "^1.8.0",
     "lit": "^3.3.3",
     "monaco-editor": "^0.55.1",
     "quill": "^2.0.3"
