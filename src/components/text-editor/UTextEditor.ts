@@ -9,7 +9,6 @@ type QuillDelta = ReturnType<Quill["getContents"]>;
 type QuillDeltaInput = Parameters<Quill["setContents"]>[0];
 import quillStyles from "quill/dist/quill.snow.css?inline";
 
-import { Theme } from "@iyulab/components/dist/utilities/Theme.js";
 import { UElement } from "@iyulab/components/dist/components/UElement.js";
 import { styles } from './UTextEditor.styles.js';
 
@@ -26,8 +25,6 @@ export class UTextEditor extends UElement {
   @property({ type: Boolean, reflect: true }) headless: boolean = false;
   /** The label text displayed in the header of the rich text editor. @default "Rich Text Editor" */
   @property({ type: String }) label: string = "Rich Text Editor";
-  /** The visual theme of the editor. Can be "light" or "dark". @default "light" */
-  @property({ type: String }) theme?: "light" | "dark" | "system" = "light";   
   /** Whether the editor should be in read-only mode, preventing user input. @default false */
   @property({ type: Boolean }) readOnly: boolean = false;
   /** The placeholder text shown when the editor is empty. @default "Start writing..." */
@@ -41,25 +38,11 @@ export class UTextEditor extends UElement {
 
   private container: Ref<HTMLElement> = createRef();
   private quill: Quill | null = null;
-  private observer: MutationObserver = new MutationObserver(() => {
-    const theme = Theme.get();
-    if (this.theme !== theme) this.theme = theme;
-  });
-  
-  connectedCallback() {
-    super.connectedCallback();
-    this.theme = Theme.get();
-    this.observer.observe(document.documentElement, { 
-      attributes: true, 
-      attributeFilter: ["data-theme"]
-    });
-  }
 
   disconnectedCallback() {
     if (this.quill) {
       this.quill = null;
     }
-    this.observer.disconnect();
     super.disconnectedCallback();
   }
 

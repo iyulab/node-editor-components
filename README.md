@@ -71,7 +71,6 @@ Quill.js 기반 리치 텍스트(WYSIWYG) 에디터 컴포넌트입니다.
 |----------|------|---------|------|
 | `headless` | `boolean` | `false` | 헤더(라벨 영역) 숨김 |
 | `label` | `string` | `"Rich Text Editor"` | 헤더 라벨 텍스트 |
-| `theme` | `"light" \| "dark" \| "system"` | 시스템 테마 추적 | 에디터 테마 |
 | `readOnly` | `boolean` | `false` | 읽기 전용 모드 |
 | `placeholder` | `string` | `"Start writing..."` | 플레이스홀더 텍스트 |
 | `value` | `string` | `""` | 에디터 HTML 내용 |

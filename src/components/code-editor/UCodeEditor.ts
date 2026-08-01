@@ -23,7 +23,7 @@ export class UCodeEditor extends UElement {
   @property({ type: Boolean, reflect: true }) headless: boolean = false;
   /** The label text displayed in the header of the code editor. @default "Editor" */
   @property({ type: String }) label: string = "Editor";
-  /** The visual theme of the code editor. Can be "light" or "dark". @default "light" */
+  /** 편집기 테마. 문서 테마를 따라 자동으로 동기화된다(직접 지정해도 덮어쓰인다). */
   @property({ type: String }) theme: "light" | "dark" = "light"; 
   /** Whether the editor should be in read-only mode, preventing user input. @default false */
   @property({ type: Boolean }) readOnly: boolean = false;
@@ -39,17 +39,21 @@ export class UCodeEditor extends UElement {
   /** 프로그램적 value 동기화 중 여부 — Monaco onDidChangeModelContent는 setValue에서도
    *  발화하므로, 이 플래그로 프로그램적 변경이 change 이벤트로 위장되는 것을 막는다. */
   private syncingValue = false;
+  // ⚠`Theme.resolved()` 를 쓴다. `Theme.get()` 은 **선호**를 돌려주므로 기본값
+  // `'system'` 에서 `=== "dark"` 가 거짓이 되어, OS 가 다크여도 밝은 테마를 골랐다.
+  // 그리고 감시 대상은 `data-theme` 만으로 부족하다 — system 선호에서 OS 테마가 바뀌면
+  // `data-theme` 은 `"system"` 그대로이고 실효값은 `theme` 속성에만 반영된다.
   private observer: MutationObserver = new MutationObserver(() => {
-    const theme = Theme.get() === "dark" ? "dark" : "light";
+    const theme = Theme.resolved();
     if (this.theme !== theme) this.theme = theme;
   });
 
   connectedCallback() {
     super.connectedCallback();
-    this.theme = Theme.get() === "dark" ? "dark" : "light";
-    this.observer.observe(document.documentElement, { 
-      attributes: true, 
-      attributeFilter: ["data-theme"]
+    this.theme = Theme.resolved();
+    this.observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme", "theme"]
     });
   }
 
