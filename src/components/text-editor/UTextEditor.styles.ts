@@ -91,11 +91,11 @@ export const styles = css`
   /* 강조는 역할 토큰 경유 — 소비자가 브랜드를 바꾸면 함께 따라온다. */
   .ql-toolbar button:hover .ql-stroke,
   .ql-toolbar button.ql-active .ql-stroke {
-    stroke: var(--u-primary-color, #1E88E5);
+    stroke: var(--u-primary-color, #1976D2);
   }
 
   .ql-toolbar button:hover .ql-fill,
   .ql-toolbar button.ql-active .ql-fill {
-    fill: var(--u-primary-color, #1E88E5);
+    fill: var(--u-primary-color, #1976D2);
   }
 `;
