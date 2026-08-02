@@ -1,7 +1,7 @@
 {
   "name": "@iyulab/editor-components",
   "description": "various editor components by iyulab",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "keywords": [
     "iyulab",
     "web-components",
@@ -44,7 +44,7 @@
     "build": "eslint && vite build"
   },
   "dependencies": {
-    "@iyulab/components": "^1.14.0",
+    "@iyulab/components": "^1.15.0",
     "lit": "^3.3.3",
     "monaco-editor": "^0.55.1",
     "quill": "^2.0.3"

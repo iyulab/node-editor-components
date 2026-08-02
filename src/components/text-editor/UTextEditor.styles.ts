@@ -81,11 +81,11 @@ export const styles = css`
   }
 
   .ql-toolbar .ql-stroke {
-    stroke: var(--u-txt-color-weak, #9E9E9E);
+    stroke: var(--u-txt-color-weak, #757575);
   }
 
   .ql-toolbar .ql-fill {
-    fill: var(--u-txt-color-weak, #9E9E9E);
+    fill: var(--u-txt-color-weak, #757575);
   }
 
   /* 강조는 역할 토큰 경유 — 소비자가 브랜드를 바꾸면 함께 따라온다. */
