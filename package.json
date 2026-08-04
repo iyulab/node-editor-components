@@ -41,7 +41,8 @@
     "test:watch": "vitest",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
-    "build": "eslint && vite build"
+    "build": "npm run typecheck && eslint && vite build",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@iyulab/components": "^1.15.0",
