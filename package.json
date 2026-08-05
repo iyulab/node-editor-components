@@ -25,6 +25,13 @@
   ],
   "type": "module",
   "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=20"
+  },
+  "sideEffects": [
+    "./src/components/*/U*.ts",
+    "./dist/components/*/U*.js"
+  ],
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
