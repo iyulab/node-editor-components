@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0] - 2026-08-05
+
+### Fixed
+
+- 🔴**The `change` event never crossed the shadow boundary.** It was dispatched without
+  `bubbles` or `composed`, so a listener attached by the consumer was never called — with
+  no error to indicate why. Anyone who worked around this by reaching into the shadow root
+  can now drop that workaround.
+
+  ```ts
+  editor.addEventListener('change', e => save(e.detail.value));
+  ```
+
 ## [0.2.2] - 2026-08-02
 
 ### Fixed
