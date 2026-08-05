@@ -91,12 +91,16 @@ export class UTextEditor extends UElement {
       if (source !== 'user') return;
       const html = quill.root.innerHTML;
       this.value = html;
+      // 🔴전파를 명시한다 — 이 이벤트는 섀도 경계를 넘어야 소비자에게 닿는다.
+      //   `composed: false`(기본값)면 리스너가 «에러 없이» 한 번도 불리지 않는다.
       this.dispatchEvent(new CustomEvent("change", {
         detail: {
           html: html,
           text: quill.getText(),
           delta: quill.getContents()
-        }
+        },
+        bubbles: true,
+        composed: true
       }));
     });
 
