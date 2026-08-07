@@ -90,4 +90,20 @@
 - 위 수정은 `@iyulab/components` 1.7.0의 "change = 사용자 상호작용 전용" 규약 정합 작업의 일환.
 
 ## [Unreleased]
+
+### Fixed
+
+- 🔴**`sideEffects` omitted this package's own entry barrel, so bundlers dropped every element
+  registration.** The barrel that `exports["."]` resolves to exists solely to register the custom
+  elements, but it was not in the `sideEffects` allowlist. A consumer writing
+  `import '@iyulab/editor-components'` — the form this package's own documentation recommends — had the module
+  elided entirely in a production build. The failure is silent: the build succeeds with no warning,
+  the tags remain in the DOM, and an unregistered custom element renders nothing.
+
+  Registration modules were already listed correctly. That was not enough: a dropped barrel means
+  they are never reached.
+
+  Both the source-resolved and published-artifact forms of every affected entry point are now
+  declared, so workspace consumers and installed consumers get the same guarantee.
+
 - Initial library version release

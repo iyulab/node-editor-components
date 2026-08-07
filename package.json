@@ -29,8 +29,10 @@
     "node": ">=20"
   },
   "sideEffects": [
+    "./dist/components/*/U*.js",
     "./src/components/*/U*.ts",
-    "./dist/components/*/U*.js"
+    "./dist/index.js",
+    "./src/index.ts"
   ],
   "exports": {
     ".": {
