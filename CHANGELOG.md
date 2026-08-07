@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.1] - 2026-08-07
+
+### Fixed
+
+- 🔴**`sideEffects` omitted this package's own entry barrel, so bundlers dropped every element
+  registration.** The barrel that `exports["."]` resolves to exists solely to register the custom
+  elements, but it was not in the `sideEffects` allowlist. A consumer writing
+  `import '@iyulab/editor-components'` — the form this package's own documentation recommends —
+  had the module elided entirely in a production build. The failure is silent: the build
+  succeeds with no warning, the tags remain in the DOM, and an unregistered custom element
+  renders nothing.
+
+  Both the source-resolved and published-artifact forms of the affected entry point are now
+  declared, so workspace consumers and installed consumers get the same guarantee.
+
 ## [0.3.0] - 2026-08-05
 
 ### Fixed
