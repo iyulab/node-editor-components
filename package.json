@@ -56,7 +56,7 @@
   "dependencies": {
     "@iyulab/components": "^1.15.0",
     "lit": "^3.3.3",
-    "monaco-editor": "^0.55.1",
+    "monaco-editor": "^0.55.1 || ^0.56.0",
     "quill": "^2.0.3"
   },
   "peerDependencies": {
