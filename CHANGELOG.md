@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.2] - 2026-08-18
+
+### Changed
+
+- Widened the `monaco-editor` dependency range from `^0.55.1` to `^0.55.1 || ^0.56.0` so
+  consumers can opt into 0.56.0. This is an added choice, not a forced upgrade — the pinned
+  `^0.55.1` range still resolves by default. 0.56.0's only breaking surface (an internal module
+  export reorganization) is caught immediately by this package's `tsc --noEmit` build gate, and
+  `UCodeEditor` only uses the standard `monaco.editor.create`/`setModelLanguage` API surface plus
+  official worker subpaths, so it is unaffected. Verified with 0.56.0 installed: clean typecheck,
+  successful build, full test suite green.
+
 ## [0.3.1] - 2026-08-07
 
 ### Fixed
