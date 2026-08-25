@@ -1,7 +1,7 @@
 {
   "name": "@iyulab/editor-components",
   "description": "various editor components by iyulab",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "keywords": [
     "iyulab",
     "web-components",
@@ -83,5 +83,8 @@
     "vite": "^8.1.4",
     "vite-plugin-dts": "^5.0.3",
     "vitest": "^4.1.10"
+  },
+  "overrides": {
+    "dompurify": "^3.4.13"
   }
 }

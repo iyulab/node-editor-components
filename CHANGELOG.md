@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.3] - 2026-08-25
+
+### Fixed
+
+- 🔴**`monaco-editor` bundles a vulnerable `dompurify` (`3.4.8`) with no pin protecting it.**
+  Four moderate/low DOMPurify advisories (GHSA-c2j3-45gr-mqc4, GHSA-cmwh-pvxp-8882,
+  GHSA-vxr8-fq34-vvx9, GHSA-55q2-fjhq-7xh7) affect `<=3.4.12`; a fresh install of this package
+  resolved the vulnerable version with nothing to stop it. Added `overrides: { dompurify:
+  "^3.4.13" }` — `dompurify` is a transitive dependency here (bundled via `monaco-editor`), not
+  a direct one, so this pins cleanly without touching `dependencies`. Verified with a clean
+  install: `npm audit` no longer reports any dompurify advisory, typecheck/lint/test/build all
+  pass. (`quill`'s own advisory, GHSA-v3m3-f69x-jf25, has no upstream fix yet and is unrelated
+  to this pin — still open, tracked separately.)
+
 ## [0.3.2] - 2026-08-18
 
 ### Changed
