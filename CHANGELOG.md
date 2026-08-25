@@ -2,6 +2,11 @@
 
 ## [0.3.3] - 2026-08-25
 
+### Added
+
+- Agent-skill reference docs for both components (`skills/iyulab-editor-components/`) —
+  properties, slots, events, and methods for `u-code-editor`/`u-text-editor`.
+
 ### Fixed
 
 - 🔴**`monaco-editor` bundles a vulnerable `dompurify` (`3.4.8`) with no pin protecting it.**
