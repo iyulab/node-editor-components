@@ -46,6 +46,7 @@
     }
   },
   "scripts": {
+    "preversion": "node ../../scripts/preversion-check.mjs",
     "preview": "vite",
     "test": "vitest run",
     "test:watch": "vitest",
