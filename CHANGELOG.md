@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.4.0] - 2026-09-10
+
+### Changed
+
+- **`monaco-editor` moved from `dependencies` to `peerDependencies`, narrowed to `^0.55.1`.**
+  Install it alongside this package:
+
+  ```
+  npm install monaco-editor@^0.55.1
+  ```
+
+  Two reasons, and the second one was a live break.
+
+  **The declared range crossed a breaking change in monaco's own `exports` map.** Up to 0.55.1
+  that map was the identity `"./*": "./*"`, so a subpath resolved to the file it names. 0.56.0
+  rewrites every subpath to `./esm/vs/<name>.js`, which sends
+  `monaco-editor/min/vs/editor/editor.main.css?inline` to a `.js` file that does not exist and
+  leaves no reachable path to the stylesheet at all — the `esm/` tree contains no `.css`. This
+  package needs the stylesheet as *text*, because the editor renders into a shadow root. The old
+  range `^0.55.1 || ^0.56.0` admitted both, and a fresh install picks the highest match, so any
+  consumer installing today got 0.56.0 and a build that could not resolve the import. Nothing in
+  this package's own build caught it: monaco is external, so the imports are passed through to
+  the consumer's bundler untouched.
+
+  **An editor engine has to be a single copy.** Monaco owns global state — its language and
+  theme registries — so two copies in one application do not compose. Declaring it as a peer
+  lets the consumer own the version, and makes a conflicting one an install-time error instead
+  of a silent second copy. `@iyulab/components` in this package, and `@iyulab/flex-table` and
+  `@iyulab/enterprise` in the same repo, already follow that convention.
+
+  Support for 0.56 and later is not abandoned — it needs a different way to obtain the
+  stylesheet text, which is tracked separately.
+
+- **`@iyulab/components` moved from `dependencies` to `peerDependencies` (`>=1.15.0`).** Same
+  reasoning as above and the same convention as the sibling packages: the component library
+  registers custom elements and owns module-level singletons (theme, toasts, overlay
+  stacking), so a second copy in one application does not compose — the copy that wins the
+  element registry is undefined, and the singletons split in two. Consumers already installing
+  `@iyulab/components` are unaffected; the declaration now says out loud that this package uses
+  the one they installed rather than fetching its own.
+
 ## [0.3.3] - 2026-08-25
 
 ### Added
