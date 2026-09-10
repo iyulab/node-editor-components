@@ -82,27 +82,26 @@ function resolveTarget(el: Element): Element {
  * 포인터 타깃이 아닌 것 — 대화 스트림에 그려지는 **표시물**과 레이아웃 컨테이너.
  * 사용자가 «활성화»하는 영역이 아니므로 자를 대면 정당한 블록 전건에 발화한다.
  */
-const NOT_A_TARGET = new Set<string>([]);
+const NOT_A_TARGET = new Set<string>([
+  // `u-code-editor` 의 섀도는 헤더(제목 + 여백 + `header-actions` 슬롯)와 monaco 컨테이너뿐이다
+  // — **자기 자신이 렌더하는 상호작용 타깃이 없다**(액션은 소비자가 슬롯으로 넣는다).
+  // ⚠monaco 내부 UI 는 minimap 비활성·툴바 없음이라 상시 타깃을 만들지 않는다.
+  'u-code-editor',
+]);
 
 /**
- * 🔴**이 환경에서 «모듈 자체를 로드할 수 없는» 것 — 통과도 미달도 아니다.**
+ * ✅**종전의 «로드 불가» 예외는 2026-09-10(cycle-522) 실측으로 해소됐다.**
  *
- * `u-code-editor` 는 `monaco-editor/min/vs/editor/editor.main.css?inline` 을 import 하는데
- * 이 워크스페이스의 Vite 가 그것을 풀지 못한다(실측 오류 그대로):
+ * 그 자리는 `u-code-editor` 가 `monaco-editor/min/vs/editor/editor.main.css?inline` 을
+ * import 하는데 이 워크스페이스의 Vite 가 그것을 풀지 못한다는 것이었다. **지금은 풀린다** —
+ * 최소 프로브(그 모듈만 import 하고 `whenDefined` 를 기다리는 테스트)가 통과한다. monaco
+ * `0.55.1` 의 `exports` 에 `"./*": "./*"` 와일드카드가 있고 파일도 실재한다.
  *
- *     Failed to resolve import "monaco-editor/min/vs/editor/editor.main.css?inline"
- *     from "src/components/code-editor/UCodeEditor.ts". Does the file exist?
- *
- * ⚠**파일은 실재한다**(`node_modules/monaco-editor/min/vs/editor/editor.main.css`) — 해석의
- * 문제다. 그리고 ***이 리포에서 그 import 를 실제로 해석해 본 것이 없다***: 빌드는 monaco 를
- * `external` 로 빼고(`vite.config.ts`), 기존 브라우저 테스트 둘은 배럴 대신
- * `UTextEditor.js` 만 직접 import 한다. 배럴을 임포트한 것은 이 게이트가 처음이고 곧바로
- * 걸렸다 ⇒ **소비자에게 같은 일이 일어나는지는 «모른다»** (Carry-Forward 로 올렸다).
- *
- * ⚠**«대상 아님»으로 넘기지 않는다.** 그것은 «잴 것이 없다»는 뜻인데 여기는 «잴 수 없다»다 —
- * cycle-485 가 정확히 이 둘을 혼동해 결함을 놓쳤다.
+ * 🔴**그래서 그 예외는 «낡은 면제» 였다** — 그것이 이 컴포넌트를 이 게이트의 시야에서
+ * 통째로 빼고 있었고, 이 리포가 「검사기 존재 ≠ 대상 포함」이라 부르는 형태의 **면제판**이다.
+ * 예외에 «원상 복구 조건» 을 적어 둔 것이 그것을 되찾게 했다 — 조건 없는 면제였다면
+ * 아무도 다시 묻지 않았을 것이다.
  */
-const CANNOT_LOAD = new Set(['u-code-editor']);
 
 /**
  * 타깃을 «갖고 있지만» 아직 대표 픽스처를 쓰지 않은 것.
@@ -187,12 +186,10 @@ beforeAll(async () => {
   const foreign = registered.length;
   registered.length = 0;
 
-  /* ⚠**배럴(`src/index.js`)을 임포트하지 않는다** — 그것이 `u-code-editor` 를 끌어오고,
-     그 모듈이 이 환경에서 해석되지 않아 **스위트 전체가 로드 실패**한다(위 CANNOT_LOAD 참조).
-     ⇒ 로드 가능한 것만 직접 임포트한다. **이것은 도출의 후퇴이고 그 사실을 숨기지 않는다**:
-     새 컴포넌트가 생기면 여기 한 줄을 더해야 보인다. 원상 복구 조건은 monaco import 해석이
-     이 워크스페이스에서 되는 것이다. */
-  await import('../../src/components/text-editor/UTextEditor.js');
+  /* ✅**배럴을 임포트한다** — cycle-522 가 그 복구 조건(monaco import 해석)을 실측으로 확인해
+     종전의 «로드 가능한 것만 직접 임포트» 후퇴를 되돌렸다. ⇒ 새 컴포넌트가 생기면 **여기를
+     고치지 않아도** 이 게이트의 시야에 들어온다. */
+  await import('../../src/index.js');
   customElements.define = original;
 
   // 형제가 실제로 무언가를 등록했는지 확인한다 — 0 이면 위 «걸러내기»가 아무 일도 하지 않은
@@ -253,16 +250,14 @@ describe('WCAG 2.2 SC 2.5.8 — 타깃 크기(최소) 게이트', () => {
       expect(
         `판정 ${Object.keys(FIXTURES).length} · 미판정 ${unjudged.length}(${unjudged.join(' ')})` +
         ` · 대상아님 ${NOT_A_TARGET.size} · 인라인예외 ${INLINE_PROSE.size}` +
-        ` · 로드불가 ${[...CANNOT_LOAD].sort().join(' ')}`,
-      ).toBe('판정 1 · 미판정 0() · 대상아님 0 · 인라인예외 0 · 로드불가 u-code-editor');
+        '',
+      ).toBe('판정 1 · 미판정 0() · 대상아님 1 · 인라인예외 0');
     });
 
     it('규칙 표에 «등록되지 않은» 이름이 남아 있지 않다 (표가 낡지 않게)', () => {
       const known = new Set(registered);
-      // ⚠CANNOT_LOAD 는 «등록되지 않는 것이 정상»이라 stale 판정에서 뺀다 — 그 대신
-      //   커버리지가 이름을 그대로 보고한다(침묵하지 않는다).
       const stale = [...NOT_A_TARGET, ...NEEDS_FIXTURE, ...Object.keys(FIXTURES)]
-        .filter((t) => !known.has(t) && !CANNOT_LOAD.has(t));
+        .filter((t) => !known.has(t));
       expect(stale, `등록되지 않은 이름: ${stale.join(' ')}`).toEqual([]);
     });
   });
