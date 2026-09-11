@@ -17,6 +17,12 @@ import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
  * 우리가 아니더라도 **소비자가 보는 것은 우리 컴포넌트**이므로, 툴바 버튼을 실제로 재서
  * 숫자를 남긴다. 미달이 나오면 그때 «서드파티 표면을 어떻게 다룰 것인가»가 사람 판단으로
  * 올라간다 — 재지 않으면 그 질문 자체가 생기지 않는다.
+ *
+ * ## 상태별 픽스처 · hit-test 축 (cycle-557)
+ *
+ * 다른 세 게이트(components · chat · data)와 같은 형태로 올렸다 — `Fixture[]`·`state`·`prepare`, 상태 수를 세는
+ * 커버리지, 상태 단위 핀, 그리고 크기보다 먼저 «실제로 눌리는가» 를 재는 hit-test 블록(정본 = components 게이트 ·
+ * 루트 `hit-test-block-sync` 가 같은 코드인지 잰다).
  */
 
 const MIN = 24;
@@ -49,13 +55,130 @@ function judge(target: Measured, others: Measured[]): Verdict {
  * 섀도 DOM 안쪽에서 셀렉터로 고른다.
  *
  * ⚠`components` 쪽 게이트는 `part` 로 고르는 헬퍼를 따로 두지만 **여기서는 쓰지 않는다** —
- * 이 패키지의 타깃은 대부분 `part` 가 붙지 않은 내부 컨트롤(`button.nav-button` ·
- * `a.caption` · `th`)이라 셀렉터 하나로 충분하다. 쓰지 않는 헬퍼를 «나중에 쓸지도»로
- * 남겨 두면 그것이 곧 고아 코드다.
+ * 이 패키지의 타깃은 `part` 가 붙지 않은 서드파티 내부 컨트롤(`.ql-toolbar button` 등)이라
+ * 셀렉터 하나로 충분하다.
  */
 function inShadow(host: Element, sel: string): Element[] {
   const root = (host as HTMLElement & { shadowRoot?: ShadowRoot }).shadowRoot;
   return root ? Array.from(root.querySelectorAll(sel)) : [];
+}
+
+/**
+ * 🔴**hit-test 축**(cycle-553 · 세 게이트 공통) — 타깃의 중심과 1px 안쪽 네 가장자리를 실제로 누르면 그 타깃이 받는가.
+ *
+ * `getBoundingClientRect` 는 조상의 `overflow` 가 자른 부분도, 닫혀서 보이지 않는 요소의 박스도 그대로 보고한다 — 크기만
+ * 재면 ***보이지도 눌리지도 않는 타깃이 통과한다.*** 실제로 그랬다: components 게이트의 `u-input` 접미 아이콘(좁은 필드에서
+ * 밖으로 밀려나 잘렸다)과, 닫힌 채 띄운 대화상자 픽스처(닫기 버튼 중심을 누르면 `body` 가 받았다).
+ *
+ * - **사용자가 스크롤로 닿을 수 있으면 닿는 것이다** — 점마다, 그 점이 보이도록 `overflow: auto|scroll` 조상과 창만 스크롤한
+ *   뒤 잰다(cycle-554: 표·시트·블록이 러너의 좁은 뷰포트를 넘어 `elementFromPoint` 가 `null` 을 돌려줬고, 뷰포트보다 넓은
+ *   타깃은 양 끝을 한 화면에 담을 수 없다). `overflow: hidden|clip` 조상은 사용자가 움직일 수 없으므로 **건드리지 않는다** —
+ *   `scrollIntoView` 는 그것까지 스크롤해 잘린 타깃을 통과시킨다. 움직인 스크롤은 점마다 돌려놓는다.
+ * - 판정은 타깃이 속한 트리(`getRootNode()`)에서 한다. 그 트리로 retarget 되어 **호스트**가 돌아오면, 그 점이 타깃 안
+ *   `<slot>` 에 꽂힌 라이트 DOM 내용 위일 때 타깃이 받은 것으로 센다(링크 안에 꽂힌 글자 등).
+ * - ⚠**이웃 타깃이 받은 것은 봐주지 않는다.** 붙어 있는 격자 셀의 경계선 때문에 가장자리를 이웃에 양보하는 면제를
+ *   시험해 봤지만(cycle-554), 네거티브 컨트롤로 끄자 **어떤 픽스처도 빨개지지 않았다** — 셀 가장자리의 불일치는 경계선이
+ *   아니라 뷰포트 밖이었다. 쓰이지 않는 면제는 조용한 미탐이라 걷어냈다. 필요해지면 그 픽스처가 빨강으로 알린다.
+ *
+ * ⚠이 헬퍼는 세 게이트(components · chat-components · data-components)에 **같은 코드로** 한 벌씩 있다 — 고치면 셋 다.
+ */
+type HitPoint = readonly [name: string, fx: number, fy: number, ox: number, oy: number];
+
+const HIT_POINTS: HitPoint[] = [
+  ['중심', 0.5, 0.5, 0, 0],
+  ['왼', 0, 0.5, 1, 0],
+  ['오른', 1, 0.5, -1, 0],
+  ['위', 0.5, 0, 0, 1],
+  ['아래', 0.5, 1, 0, -1],
+];
+
+function describeEl(el: Element | null): string {
+  if (!el) return 'null';
+  const cls = el.getAttribute('class');
+  return `${el.localName}${cls ? `.${cls.split(' ')[0]}` : ''}`;
+}
+
+function unreachablePoints(el: Element): Array<{ point: string; hit: string }> {
+  const root = el.getRootNode() as Document | ShadowRoot;
+  const host = root instanceof ShadowRoot ? root.host : null;
+  const at = (p: HitPoint): [number, number] => {
+    const r = el.getBoundingClientRect();
+    return [r.left + r.width * p[1] + p[3], r.top + r.height * p[2] + p[4]];
+  };
+  const misses: Array<{ point: string; hit: string }> = [];
+  for (const p of HIT_POINTS) {
+    const restore = revealPoint(el, () => at(p));
+    try {
+      const [x, y] = at(p);
+      const hit = root.elementFromPoint(x, y);
+      const ok = !!hit && (hit === el || el.contains(hit) || (hit === host && slottedContentAt(el, x, y)));
+      if (!ok) misses.push({ point: p[0], hit: describeEl(hit) });
+    } finally {
+      restore();
+    }
+  }
+  return misses;
+}
+
+/** 평탄 트리의 부모 — 슬롯에 꽂혔으면 그 슬롯, 섀도 루트면 그 호스트. */
+function flatParent(node: Node): Element | null {
+  const slot = (node as Element).assignedSlot;
+  if (slot) return slot;
+  const parent = node.parentNode;
+  if (parent instanceof ShadowRoot) return parent.host;
+  return parent instanceof Element ? parent : null;
+}
+
+/** 그 점이 보이도록 사용자가 스크롤할 수 있는 조상과 창을 움직인다. 돌려놓는 함수를 돌려준다. */
+function revealPoint(el: Element, point: () => [number, number]): () => void {
+  const moved: Array<[Element, number, number]> = [];
+  for (let a = flatParent(el); a && a !== document.documentElement && a !== document.body; a = flatParent(a)) {
+    const cs = getComputedStyle(a);
+    const canX = /auto|scroll/.test(cs.overflowX) && a.scrollWidth > a.clientWidth;
+    const canY = /auto|scroll/.test(cs.overflowY) && a.scrollHeight > a.clientHeight;
+    if (!canX && !canY) continue;
+    const [x, y] = point();
+    const box = a.getBoundingClientRect();
+    const left = box.left + a.clientLeft;
+    const top = box.top + a.clientTop;
+    const before: [Element, number, number] = [a, a.scrollLeft, a.scrollTop];
+    if (canX && (x < left || x >= left + a.clientWidth)) a.scrollLeft += x - (left + a.clientWidth / 2);
+    if (canY && (y < top || y >= top + a.clientHeight)) a.scrollTop += y - (top + a.clientHeight / 2);
+    if (a.scrollLeft !== before[1] || a.scrollTop !== before[2]) moved.push(before);
+  }
+  const wx = window.scrollX;
+  const wy = window.scrollY;
+  const [x, y] = point();
+  const vw = document.documentElement.clientWidth;
+  const vh = document.documentElement.clientHeight;
+  const dx = x < 0 || x >= vw ? x - vw / 2 : 0;
+  const dy = y < 0 || y >= vh ? y - vh / 2 : 0;
+  if (dx || dy) window.scrollBy(dx, dy);
+  return () => {
+    window.scrollTo(wx, wy);
+    for (const [a, l, t] of moved.reverse()) {
+      a.scrollLeft = l;
+      a.scrollTop = t;
+    }
+  };
+}
+
+/** 타깃 안 `<slot>` 에 꽂힌 라이트 DOM 내용 중 그 점을 덮는 것이 있는가. */
+function slottedContentAt(el: Element, x: number, y: number): boolean {
+  for (const slot of Array.from(el.querySelectorAll('slot'))) {
+    for (const n of slot.assignedNodes({ flatten: true })) {
+      let rects: DOMRect[];
+      if (n instanceof Element) {
+        rects = [n.getBoundingClientRect()];
+      } else {
+        const range = document.createRange();
+        range.selectNodeContents(n);
+        rects = Array.from(range.getClientRects());
+      }
+      if (rects.some((q) => x >= q.left && x <= q.right && y >= q.top && y <= q.bottom)) return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -79,8 +202,8 @@ function resolveTarget(el: Element): Element {
 // ---------------------------------------------------------------------------
 
 /**
- * 포인터 타깃이 아닌 것 — 대화 스트림에 그려지는 **표시물**과 레이아웃 컨테이너.
- * 사용자가 «활성화»하는 영역이 아니므로 자를 대면 정당한 블록 전건에 발화한다.
+ * 포인터 타깃이 아닌 것 — 자기 자신이 렌더하는 상호작용 타깃이 없는 것.
+ * 사용자가 «활성화»하는 영역이 아니므로 자를 대면 정당한 컴포넌트 전건에 발화한다.
  */
 const NOT_A_TARGET = new Set<string>([
   // `u-code-editor` 의 섀도는 헤더(제목 + 여백 + `header-actions` 슬롯)와 monaco 컨테이너뿐이다
@@ -112,26 +235,32 @@ const NEEDS_FIXTURE = new Set<string>([]);
 /**
  * 🔴**측정 결과 미달인데 «치수를 올리는 것이 시각적 공개 계약 변경»이라 사람 판단이 필요한 것.**
  * 여기 있는 동안 이 파일은 그것을 **미달로 단언**하므로 스위트는 초록이고, 치수를 올리면
- * 빨개진다 — 그때 이 집합에서 빼는 것이 완료 신호다.
+ * 빨개진다 — 그때 이 집합에서 빼는 것이 완료 신호다. 태그 전체(`u-x`) 또는 한 상태(`u-x [상태]`)에 건다.
  */
-const UNDERSIZED_PINS = new Set<string>([]);
+const UNDERSIZED_PINS = new Set<string>([
+  /* 📌Quill 이 치수를 정하는 떠 있는 UI 둘(cycle-557 · `HD-58`) — 우리가 한 줄도 그리지 않는 서드파티 표면이다(머리말 참조).
+     ⑴ 색 선택기 견본 16×16 이 붙어 있다(간격 예외도 서지 않는다) ⑵ 링크 툴팁의 Edit·Remove 가 높이 19 다(열기 링크 126×26 은 통과).
+     키우려면 Quill 스타일을 덮어써야 한다 — 서드파티 표면을 어디까지 우리가 책임질지는 사람 판단이다. */
+  'u-text-editor [선택기 열림 · 색]',
+  'u-text-editor [링크 툴팁]',
+]);
 
 /**
  * 🔴**SC 2.5.8 「인라인」 예외** — *"타깃이 문장 안에 있거나, 그 크기가 타깃 아닌 텍스트의
- * `line-height` 에 의해 제약되는 경우"* 는 규격이 명시적으로 면제한다.
- *
- * `u-ref-tag` 는 답변 본문 **문장 안에** 삽입되는 인용 배지다(마크다운 렌더가 `ref` 자리
- * 표시자를 이 태그로 바꾼다). 실측 **10×15** 인데, 이것을 24px 로 키우면 ***줄 높이를 밀어
- * 본문 조판이 깨진다*** — 규격이 이 예외를 둔 이유가 정확히 그것이다.
- *
- * ⚠**면제는 이름으로 좁게 준다** — 「인라인처럼 보이는 것」을 자동 판정하려면 문맥을 읽어야
- * 하고, 넓은 면제는 조용한 미탐이 된다(`u-widgets` 게이트가 같은 규칙을 같은 이유로 쓴다).
- * ⚠**면제해도 재기는 한다** — 픽스처를 유지하므로 실측값이 테스트 이름과 함께 보고된다.
+ * `line-height` 에 의해 제약되는 경우"* 는 규격이 명시적으로 면제한다. 이 패키지에는 아직 없다.
+ * ⚠**면제는 이름으로 좁게 준다** — 넓은 면제는 조용한 미탐이 된다.
  */
 const INLINE_PROSE = new Set<string>([]);
 
 interface Fixture {
   html: string;
+  /** 한 태그를 여러 상태로 잴 때 그 상태의 이름(테스트 이름에 붙는다). 커버리지는 상태 단위로 센다. */
+  state?: string;
+  /**
+   * 재기 전에 **사용자 경로로** 상태를 연다. 여는 데 실패하면 **던진다** — 닫힌 채 숨은 타깃을 재고 초록이 되는 것이
+   * 이 부류의 조용한 미탐이다.
+   */
+  prepare?: (host: Element) => Promise<void>;
   /** 이 픽스처 안의 «타깃»들. 생략하면 태그 자신. */
   targets?: (tag: string) => Element[];
   /**
@@ -139,21 +268,78 @@ interface Fixture {
    * 쓰지 않는다»(크기로만 판정) — 고립 픽스처에 예외를 적용하면 무엇이든 통과한다.
    */
   spacingIsOurs?: true;
-  /** 렌더가 비동기인 블록(마크다운 파싱·이미지 로드 등)을 위한 추가 대기(ms). */
+  /** 렌더가 비동기인 컴포넌트(서드파티 초기화 등)를 위한 추가 대기(ms). */
   settle?: number;
 }
 
-/** 실제로 재는 것 — 대표 픽스처와 그 안의 타깃. */
-const FIXTURES: Record<string, Fixture> = {
-  'u-text-editor': {
-    // Quill 툴바 버튼. ⚠**우리가 치수를 정하지 않는다**(색만 덮어쓴다 — `.ql-stroke`/`.ql-fill`)
-    //   — 그럼에도 재는 이유는 위 머리말 참조. 툴바 버튼은 서로 **붙어 있으므로** 간격 예외를
-    //   켠다(그 예외가 실제로 일하는 자리다 — cycle-496 이 세운 기준).
-    html: '<u-text-editor style="width:480px;height:200px"></u-text-editor>',
-    targets: () => inShadow(document.querySelector('u-text-editor')!, '.ql-toolbar button'),
-    spacingIsOurs: true,
-    settle: 400,
-  },
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+// ⚠높이는 공개 API(`height` 속성)로 준다 — 호스트에 CSS 높이를 주는 것은 이 컴포넌트의 계약이 아니다(편집 영역은
+//   `height` 가 정한다). 종전 픽스처는 CSS 높이를 줘, 편집기 아래쪽이 상자 밖에 있었다(cycle-557 hit-test 가 찾았다).
+const EDITOR = '<u-text-editor style="width:480px" height="200"></u-text-editor>';
+
+/** 툴바의 한 선택기를 사용자 경로(라벨 `mousedown`)로 열고, `.ql-expanded` 가 붙을 때까지 기다린다 — 안 열리면 던진다. */
+async function openPicker(host: Element, pickerSel: string): Promise<void> {
+  const label = host.shadowRoot!.querySelector(`.ql-toolbar ${pickerSel} .ql-picker-label`) as HTMLElement | null;
+  if (!label) throw new Error(`툴바에 선택기 ${pickerSel} 가 없다`);
+  label.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+  const picker = label.closest('.ql-picker')!;
+  for (let i = 0; i < 50 && !picker.classList.contains('ql-expanded'); i++) await sleep(20);
+  if (!picker.classList.contains('ql-expanded')) throw new Error(`선택기 ${pickerSel} 가 열리지 않았다 — 닫힌 항목을 재면 미탐이다`);
+}
+
+/** 실제로 재는 것 — 대표 픽스처와 그 안의 타깃. 상태가 여럿이면 배열. */
+const FIXTURES: Record<string, Fixture | Fixture[]> = {
+  'u-text-editor': [
+    {
+      state: '툴바',
+      // Quill 툴바의 버튼과 **선택기 라벨**(`.ql-picker-label` — 머리글 등 드롭다운을 여는 `span[role=button]`).
+      // ⚠종전 셀렉터 `.ql-toolbar button` 은 라벨을 놓쳤다(§D-57 표의 공백 — 셀렉터가 요소 이름을 전제했다).
+      // ⚠**우리가 치수를 정하지 않는다**(색만 덮어쓴다 — `.ql-stroke`/`.ql-fill`) — 그럼에도 재는 이유는 머리말.
+      //   툴바 버튼은 서로 **붙어 있으므로** 간격 예외를 켠다(그 예외가 실제로 일하는 자리다 — cycle-496 이 세운 기준).
+      html: EDITOR,
+      targets: () => inShadow(document.querySelector('u-text-editor')!, '.ql-toolbar button, .ql-toolbar .ql-picker-label'),
+      spacingIsOurs: true,
+      settle: 400,
+    },
+    // 선택기 항목은 두 형태다 — **글자 항목**(크기·머리글·글꼴)과 **색 견본**(글자색·배경색 — 격자로 붙은 칸). 한 형태만
+    // 재면 다른 형태가 시야 밖에 남는다 ⇒ 형태마다 대표 하나(`.ql-size` · `.ql-color`)를 연다.
+    // Quill 은 라벨의 `mousedown` 으로 연다(`click` 이 아니다). 항목은 열린 뒤에만 보인다 ⇒ `.ql-expanded` 를 기다리고
+    // 안 열리면 던진다. 항목은 목록 안에서 붙어 있다 — 간격 예외를 켠다.
+    {
+      state: '선택기 열림 · 글자',
+      html: EDITOR,
+      settle: 400,
+      prepare: (host) => openPicker(host, '.ql-size'),
+      targets: () => inShadow(document.querySelector('u-text-editor')!, '.ql-size.ql-expanded .ql-picker-item'),
+      spacingIsOurs: true,
+    },
+    {
+      state: '선택기 열림 · 색',
+      html: EDITOR,
+      settle: 400,
+      prepare: (host) => openPicker(host, '.ql-color'),
+      targets: () => inShadow(document.querySelector('u-text-editor')!, '.ql-color.ql-expanded .ql-picker-item'),
+      spacingIsOurs: true,
+    },
+    {
+      state: '링크 툴팁',
+      // 커서가 링크 안에 오면 snow 테마가 미리보기 툴팁(열기 링크 · Edit · Remove)을 띄운다. 커서는 Quill 선택 API 로 둔다 —
+      // 섀도 DOM 안에서 Quill 의 DOM 선택 추적은 브라우저마다 달라, 클릭 경로는 이 게이트가 재려는 것(툴팁 타깃 치수)과
+      // 무관한 이유로 흔들린다. ⚠툴팁이 안 뜨면 던진다. 세 링크의 배치는 Quill 이 정한다 — 크기로만 판정한다.
+      html: '<u-text-editor style="width:480px" height="200" value="<p><a href=&quot;https://example.com&quot;>link</a> text</p>"></u-text-editor>',
+      settle: 400,
+      prepare: async (host) => {
+        const quill = (host as unknown as { quill: { setSelection: (i: number, l: number, s: string) => void } | null }).quill;
+        if (!quill) throw new Error('Quill 인스턴스가 없다');
+        quill.setSelection(2, 0, 'user');
+        const tip = () => host.shadowRoot!.querySelector('.ql-tooltip') as HTMLElement | null;
+        for (let i = 0; i < 50 && (!tip() || tip()!.classList.contains('ql-hidden')); i++) await sleep(20);
+        if (!tip() || tip()!.classList.contains('ql-hidden')) throw new Error('링크 툴팁이 뜨지 않았다 — 숨은 링크를 재면 미탐이다');
+      },
+      targets: () => inShadow(document.querySelector('u-text-editor')!,
+        '.ql-tooltip a.ql-preview, .ql-tooltip a.ql-action, .ql-tooltip a.ql-remove'),
+    },
+  ],
 };
 
 async function mount(html: string, settle = 0): Promise<void> {
@@ -227,9 +413,84 @@ describe('WCAG 2.2 SC 2.5.8 — 타깃 크기(최소) 게이트', () => {
     });
   });
 
+  describe('규칙 자체 — hit-test 축', () => {
+    const pointsOf = (el: Element) => unreachablePoints(el).map((m) => m.point);
+    const ALL = ['중심', '왼', '오른', '위', '아래'];
+
+    it('보이는 버튼은 다섯 점 모두 닿는다 — 자손(글자·아이콘)이 받아도 그 버튼이 받은 것이다', async () => {
+      await mount('<button style="width:60px;height:30px"><span style="display:block">OK</span></button>');
+      expect(pointsOf(document.querySelector('button')!)).toEqual([]);
+    });
+
+    it('🔴조상 overflow 에 통째로 잘린 버튼은 다섯 점 모두 닿지 않는다 — 박스는 그대로 보고되는데도', async () => {
+      await mount('<div style="width:40px;height:30px;overflow:hidden;position:relative">' +
+        '<button style="position:absolute;left:50px;width:30px;height:30px">x</button></div>');
+      const button = document.querySelector('button')!;
+      expect(Math.round(button.getBoundingClientRect().width), '크기만 보면 통과처럼 보인다').toBe(30);
+      expect(pointsOf(button)).toEqual(ALL);
+    });
+
+    it('🔴반쯤 잘린 버튼은 잘린 쪽 가장자리만 닿지 않는다 (중심만 재면 놓친다)', async () => {
+      await mount('<div style="width:40px;height:30px;overflow:hidden;position:relative">' +
+        '<button style="position:absolute;left:20px;width:30px;height:30px">x</button></div>');
+      expect(pointsOf(document.querySelector('button')!)).toEqual(['오른']);
+    });
+
+    it('🔴다른 요소에 덮인 버튼은 닿지 않는다', async () => {
+      await mount('<div style="position:relative"><button style="width:30px;height:30px">x</button>' +
+        '<div style="position:absolute;inset:0;width:30px;height:30px"></div></div>');
+      expect(pointsOf(document.querySelector('button')!)).toEqual(ALL);
+    });
+
+    it('뷰포트 밖이어도 창을 스크롤해 닿으면 닿는다 — 그리고 스크롤은 돌려놓는다', async () => {
+      await mount('<div style="width:3000px"><button style="margin-left:2600px;width:30px;height:30px">x</button></div>');
+      expect(pointsOf(document.querySelector('button')!)).toEqual([]);
+      expect(window.scrollX).toBe(0);
+    });
+
+    it('🔴뷰포트보다 넓은 타깃도 양 끝이 닿는다 — 점마다 드러낸다', async () => {
+      await mount('<button style="width:2500px;height:30px">wide</button>');
+      expect(pointsOf(document.querySelector('button')!)).toEqual([]);
+    });
+
+    it('사용자 스크롤 컨테이너(overflow:auto) 밖에 있는 타깃은 그 컨테이너를 스크롤해 닿는다', async () => {
+      // ⚠높이는 가로 스크롤바가 생겨도 버튼(30)이 들어갈 만큼 — 40 이면 스크롤바가 위아래 끝을 가려 픽스처가 틀린다.
+      await mount('<div id="sc" style="width:100px;height:60px;overflow:auto"><div style="width:600px">' +
+        '<button style="margin-left:500px;width:30px;height:30px">x</button></div></div>');
+      expect(pointsOf(document.querySelector('button')!)).toEqual([]);
+      expect(document.getElementById('sc')!.scrollLeft).toBe(0);
+    });
+
+    it('🔴overflow:hidden 컨테이너는 스크롤하지 않는다 — 잘린 타깃은 잘린 채로 남는다(scrollIntoView 는 이것을 드러낸다)', async () => {
+      await mount('<div style="width:100px;height:40px;overflow:hidden"><div style="width:600px">' +
+        '<button style="margin-left:500px;width:30px;height:30px">x</button></div></div>');
+      expect(pointsOf(document.querySelector('button')!)).toEqual(ALL);
+    });
+
+    it('섀도 안 링크에 슬롯으로 꽂힌 글자 위의 점도 그 링크가 받은 것으로 센다(retarget 보정)', async () => {
+      const name = 'zz-hit-slot-link';
+      if (!customElements.get(name)) {
+        customElements.define(name, class extends HTMLElement {
+          constructor() {
+            super();
+            this.attachShadow({ mode: 'open' }).innerHTML =
+              '<a href="#x" style="display:inline-block;padding:4px"><slot></slot></a>';
+          }
+        });
+      }
+      await mount(`<${name}>Linked text</${name}>`);
+      expect(pointsOf(document.querySelector(name)!.shadowRoot!.querySelector('a')!)).toEqual([]);
+    });
+
+    it('⚪NEGATIVE — 이웃 타깃이 가장자리를 덮어도 봐주지 않는다 (이웃에 양보하는 면제는 없다)', async () => {
+      await mount('<div style="display:flex"><button id="a" style="width:40px;height:30px;margin-right:-3px">a</button>' +
+        '<button id="b" style="width:40px;height:30px;position:relative">b</button></div>');
+      expect(pointsOf(document.getElementById('a')!)).toEqual(['오른']);
+    });
+  });
+
   describe('🔴 대상 도출 — 등록된 태그가 규칙 표를 벗어나지 않는다', () => {
     it('배럴이 태그를 실제로 등록한다 (도출이 0건이면 아래 단언이 전부 공허해진다)', () => {
-      // ⚠이 패키지가 소유한 태그는 둘인데 하나는 로드 불가라, 실제로 등록되는 것은 하나다.
       expect(registered.length).toBeGreaterThan(0);
     });
 
@@ -245,13 +506,13 @@ describe('WCAG 2.2 SC 2.5.8 — 타깃 크기(최소) 게이트', () => {
     it('📌커버리지를 보고한다 — 「미판정」은 통과가 아니다', () => {
       const unjudged = [...NEEDS_FIXTURE].sort();
       // ⚠이 단언은 «미판정이 늘지 않았는가»를 지킨다. 픽스처를 쓰면 이 수가 줄고 그때 이
-      //   줄을 함께 고치는 것이 그 작업의 완료 신호다. 숫자를 문자열로 고정하는 이유는
-      //   `components` 쪽과 같다 — 분류를 바꾸면 반드시 여기도 손대게 만든다.
+      //   줄을 함께 고치는 것이 그 작업의 완료 신호다.
+      // 🔴«판정» 은 태그 수와 **상태 수**를 함께 말한다 — 태그만 세면 열린 상태를 빠뜨려도 이 줄이 변하지 않는다.
+      const states = Object.values(FIXTURES).flat().length;
       expect(
-        `판정 ${Object.keys(FIXTURES).length} · 미판정 ${unjudged.length}(${unjudged.join(' ')})` +
-        ` · 대상아님 ${NOT_A_TARGET.size} · 인라인예외 ${INLINE_PROSE.size}` +
-        '',
-      ).toBe('판정 1 · 미판정 0() · 대상아님 1 · 인라인예외 0');
+        `판정 ${Object.keys(FIXTURES).length}(${states}상태) · 미판정 ${unjudged.length}(${unjudged.join(' ')})` +
+        ` · 대상아님 ${NOT_A_TARGET.size} · 인라인예외 ${INLINE_PROSE.size}`,
+      ).toBe('판정 1(4상태) · 미판정 0() · 대상아님 1 · 인라인예외 0');
     });
 
     it('규칙 표에 «등록되지 않은» 이름이 남아 있지 않다 (표가 낡지 않게)', () => {
@@ -263,21 +524,31 @@ describe('WCAG 2.2 SC 2.5.8 — 타깃 크기(최소) 게이트', () => {
   });
 
   describe('실측 — 픽스처를 가진 모든 타깃', () => {
-    for (const [tag, fixture] of Object.entries(FIXTURES)) {
-      const pinned = UNDERSIZED_PINS.has(tag);
+    const CASES = Object.entries(FIXTURES).flatMap(([tag, entry]) =>
+      (Array.isArray(entry) ? entry : [entry]).map((fixture) => ({ tag, fixture })));
+    for (const { tag, fixture } of CASES) {
+      const name = `${tag}${fixture.state ? ` [${fixture.state}]` : ''}`;
+      const pinned = UNDERSIZED_PINS.has(tag) || UNDERSIZED_PINS.has(name);
       const inline = INLINE_PROSE.has(tag);
       const label = pinned
         ? '📌미달로 «핀»돼 있다 (사람 판단 대기)'
         : inline
           ? '「인라인」 예외 — 크기 하한을 적용하지 않되 실측은 보고한다'
           : 'SC 2.5.8 을 만족한다';
-      it(`${tag}: ${label}`, async () => {
+      it(`${name}: ${label}`, async () => {
         await mount(fixture.html, fixture.settle);
-        const targets = (fixture.targets ? fixture.targets(tag) : [document.querySelector(tag)!])
-          .map(resolveTarget)
-          .map(measure);
+        if (fixture.prepare) await fixture.prepare(document.querySelector(tag)!);
+        const els = (fixture.targets ? fixture.targets(tag) : [document.querySelector(tag)!]).map(resolveTarget);
+        const targets = els.map(measure);
         expect(targets.length, '타깃을 하나도 못 찾으면 이 판정은 무의미하다').toBeGreaterThan(0);
 
+        // 🔴크기보다 먼저 — 그 타깃이 실제로 눌리는가. 잘렸거나 가려졌거나 닫혀 있으면 크기 판정은 의미가 없다.
+        //   (세 게이트 공통 · 인라인 예외도 «눌린다» 는 전제는 면제하지 않는다.)
+        const unreachable = els
+          .map((el) => ({ el, misses: unreachablePoints(el) }))
+          .filter(({ misses }) => misses.length > 0)
+          .map(({ el, misses }) => `${describeEl(el)} — ${misses.map((m) => `${m.point}→${m.hit}`).join(' · ')}`);
+        expect(unreachable, '누르면 다른 요소가 받는 타깃 — 잘렸거나 가려졌거나 닫혀 있다').toEqual([]);
         const verdicts = targets.map((t, i) =>
           fixture.spacingIsOurs ? judge(t, targets.filter((_, j) => j !== i)) : judge(t, [t]),
         );
@@ -286,11 +557,6 @@ describe('WCAG 2.2 SC 2.5.8 — 타깃 크기(최소) 게이트', () => {
         if (pinned) {
           expect(verdicts.some((v) => v === 'undersized'), detail).toBe(true);
         } else if (inline) {
-          /* 크기 하한은 적용하지 않는다. 대신 **예외의 전제**를 잰다 — 이 컴포넌트가 실제로
-             문장 안을 «인라인으로 흐르는가». 블록이 되면 더 이상 문장 안의 타깃이 아니고
-             면제 근거가 사라진다 ⇒ 면제가 조용히 넓어지는 것을 막는 자리다.
-             ⚠재는 것은 **호스트**다 — 섀도 안쪽 `a` 는 `display: block` 이어도 무방하다
-             (문장의 흐름을 정하는 것은 호스트의 display 다). */
           const host = document.querySelector(tag)!;
           expect(getComputedStyle(host).display, `${detail} · 인라인이 아니면 면제 근거가 없다`)
             .toMatch(/^inline/);

@@ -103,9 +103,6 @@ export class UTextEditor extends UElement {
         composed: true
       }));
     });
-
-    // Apply height
-    this.updateEditorHeight();
   }
 
   protected async updated(changedProperties: PropertyValues) {
@@ -123,10 +120,6 @@ export class UTextEditor extends UElement {
       
       if (changedProperties.has("placeholder")) {
         this.quill.root.dataset.placeholder = this.placeholder;
-      }
-
-      if (changedProperties.has("height")) {
-        this.updateEditorHeight();
       }
     }
   }
@@ -150,15 +143,6 @@ export class UTextEditor extends UElement {
         <div class="quill-container" ${ref(this.container)}></div>
       </div>
     `;
-  }
-
-  private updateEditorHeight() {
-    if (this.quill) {
-      const editorElement = this.shadowRoot?.querySelector('.ql-editor') as HTMLElement;
-      if (editorElement) {
-        editorElement.style.height = `${this.height - 42}px`; // 42px for toolbar height
-      }
-    }
   }
 
   /**

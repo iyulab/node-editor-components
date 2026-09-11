@@ -44,6 +44,21 @@
   `@iyulab/components` are unaffected; the declaration now says out loud that this package uses
   the one they installed rather than fetching its own.
 
+### Fixed
+
+- **The text editor's editing area no longer slides out of the component when the toolbar
+  wraps.** The editing area was sized as `height` minus a fixed 42px for the toolbar, but the
+  default toolbar wraps onto two or more rows in narrower editors (88px at 480px wide), which
+  pushed the bottom of the editing area — and its scrollbar — outside the component, where it
+  was cut off. The toolbar and the editing area now share `height` by layout: the editing area
+  is whatever the toolbar leaves, at any width.
+
+- **The text editor's dropdowns and link tooltip are no longer cut off at the component's
+  edge.** The component clipped everything outside its box, so in a short editor the link
+  tooltip (open, Edit, Remove) and the lower rows of the color pickers could be neither seen
+  nor clicked. They now extend past the component like any popup. The rounded corners are kept
+  by the header — or the toolbar when `headless` — rounding its own top corners.
+
 ## [0.3.3] - 2026-08-25
 
 ### Added

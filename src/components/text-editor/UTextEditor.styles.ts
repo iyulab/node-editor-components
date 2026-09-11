@@ -22,12 +22,14 @@ import { css } from "lit";
  * 색 선언 수 25 → 9.
  */
 export const styles = css`
+  /* 호스트는 자르지 않는다 — Quill 의 떠 있는 UI(선택기 목록 · 링크 툴팁)는 편집기 상자 밖으로 나갈 수 있어야 한다.
+     종전 overflow: hidden 은 짧은 편집기에서 그것들을 잘라 누를 수 없게 만들었다. 둥근 모서리는 배경을 칠하는
+     머리글(과 머리글이 없을 때의 툴바)이 자기 위 모서리를 둥글게 해서 지킨다. */
   :host {
     display: block;
     border: 1px solid var(--u-border-color, #E0E0E0);
     border-radius: var(--u-radius-md, 4px);
     background: var(--u-panel-bg-color, #FFFFFF);
-    overflow: hidden;
   }
 
   .header {
@@ -38,6 +40,11 @@ export const styles = css`
     background: var(--u-bg-color-hover, #F5F5F5);
     min-height: 48px;
     gap: 12px;
+    border-radius: calc(var(--u-radius-md, 4px) - 1px) calc(var(--u-radius-md, 4px) - 1px) 0 0;
+  }
+
+  :host([headless]) .ql-toolbar {
+    border-radius: calc(var(--u-radius-md, 4px) - 1px) calc(var(--u-radius-md, 4px) - 1px) 0 0;
   }
 
   .title {
@@ -56,6 +63,33 @@ export const styles = css`
 
   .quill-container {
     height: 100%;
+  }
+
+  /* 편집 영역은 «높이에서 툴바를 뺀 나머지» 다 — 툴바 높이를 숫자로 가정하지 않는다(좁으면 툴바가 여러 줄로 접힌다).
+     종전에는 편집 영역을 height - 42px 로 줘, 툴바가 접히면 편집 영역이 상자 밖으로 밀려나 아래가 잘렸다.
+     ⚠Quill 은 넘겨받은 요소(.quill-container)를 .ql-container 로 만들고, 툴바를 그 «앞 형제» 로 .editor 안에 넣는다 —
+     그래서 세로 배치의 주인은 .editor 다. */
+  .editor {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .editor > .ql-toolbar {
+    flex: none;
+  }
+
+  .editor > .ql-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ql-container > .ql-editor {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
   }
 
   .ql-editor {
