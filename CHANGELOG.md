@@ -4,6 +4,9 @@
 
 ### Changed
 
+- **Fallback literals for `--u-txt-color-weak` follow `@iyulab/components` 1.40.0.** They are
+  only used when that stylesheet is not loaded; with it, nothing changes here.
+
 - **`monaco-editor` moved from `dependencies` to `peerDependencies`, narrowed to `^0.55.1`.**
   Install it alongside this package:
 
