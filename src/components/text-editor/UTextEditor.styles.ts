@@ -58,6 +58,8 @@ export const styles = css`
 
   .editor {
     position: relative;
+    /* 이 값은 «호스트 CSS 높이를 따르는 것» 이 아니라 렌더의 인라인 style 이 항상 덮는 폴백이다 —
+       높이의 주인은 height 프로퍼티이고, 그 JSDoc 이 계약을 적는다. (주석에도 백틱을 쓰지 않는다 — css 템플릿이 그 자리에서 끝난다.) */
     height: 300px;
   }
 

@@ -160,3 +160,68 @@ describe('u-code-editor — 판 교체 시 «동등한 대체» 를 판정할 �
     expect(el.shadowRoot!.querySelector('.monaco-editor')).not.toBe(null);
   });
 });
+
+/**
+ * **크기 계약 — «호스트 상자» 가 주인이다**(cycle-561).
+ *
+ * 🔴형제 `u-text-editor` 는 **정반대**다 — 거기서는 `height` 프로퍼티가 편집 영역을 정하고 호스트 CSS 높이는
+ * 상자만 바꾼다. 한쪽을 먼저 쓴 소비자가 레이아웃을 그대로 옮기면 조용히 어긋나므로, 두 문서가 서로를 가리킨다.
+ *
+ * ⚠종전에는 편집 영역을 «호스트 − 32px» 로 줬는데 실제 머리글은 24px 라 **아래 8px 을 영구히 못 쓰고 있었다**.
+ * 이제 세로 flex 가 «머리글을 뺀 나머지» 를 준다 — 형제에서 걷어낸 «툴바 높이를 숫자로 가정» 과 같은 부류였다.
+ */
+describe('u-code-editor — 크기 계약(호스트 상자가 주인)', () => {
+  let wrap: HTMLDivElement;
+
+  beforeEach(() => {
+    wrap = document.createElement('div');
+    document.body.appendChild(wrap);
+  });
+  afterEach(() => wrap.remove());
+
+  async function mountIn(wrapperStyle: string, attrs = ''): Promise<UCodeEditor> {
+    wrap.setAttribute('style', wrapperStyle);
+    wrap.innerHTML = `<u-code-editor ${attrs}></u-code-editor>`;
+    const el = wrap.firstElementChild as UCodeEditor;
+    await customElements.whenDefined('u-code-editor');
+    await el.updateComplete;
+    await settle();
+    return el;
+  }
+
+  const box = (el: UCodeEditor, sel: string) =>
+    (el.shadowRoot!.querySelector(sel) as HTMLElement).getBoundingClientRect();
+
+  it('🔴편집 영역은 «호스트 − 머리글» 을 남김없이 쓴다 — 머리글 높이를 숫자로 가정하지 않는다', async () => {
+    const el = await mountIn('height:400px;width:480px');
+    const host = el.getBoundingClientRect();
+    const headerH = Math.round(box(el, '.header').height);
+    expect(Math.round(host.height)).toBe(400);
+    expect(headerH, '이 사례는 머리글이 보여야 의미가 있다').toBeGreaterThan(0);
+    expect(Math.round(box(el, '.editor').height), '편집 영역 = 호스트 − 머리글').toBe(400 - headerH);
+    expect(Math.round(host.bottom - box(el, '.editor').bottom), '아래에 못 쓰는 공간이 남지 않는다').toBe(0);
+  });
+
+  it('`headless` 면 편집 영역이 호스트 전체다', async () => {
+    const el = await mountIn('height:400px;width:480px', 'headless');
+    expect(Math.round(box(el, '.editor').height)).toBe(400);
+  });
+
+  it('호스트 상자를 바꾸면 편집 영역이 따라온다 — 크기의 주인은 호스트다(형제와 반대)', async () => {
+    const el = await mountIn('height:400px;width:480px', 'style="height:150px"');
+    const headerH = Math.round(box(el, '.header').height);
+    expect(Math.round(el.getBoundingClientRect().height)).toBe(150);
+    expect(Math.round(box(el, '.editor').height)).toBe(150 - headerH);
+  });
+
+  it('🔴부모가 auto 높이면 편집 영역이 몇 px 로 붕괴한다 — 계약이라 고정한다(부모에 높이를 주거나 호스트에 직접 준다)', async () => {
+    const collapsed = await mountIn('width:480px');
+    const headerH = Math.round(box(collapsed, '.header').height);
+    // ⚠**정확한 px 를 고정하지 않는다** — 실측 5px 는 monaco 의 내재 높이라 구현 사항이다(판이 바뀌면 달라진다).
+    //   고정하는 것은 계약이다: «머리글보다도 얇다» = 편집기로 쓸 수 없다.
+    expect(Math.round(box(collapsed, '.editor').height), 'height:100% 는 auto 높이 부모에서 무효라 편집 영역이 붕괴한다')
+      .toBeLessThan(headerH);
+    const fixed = await mountIn('height:300px;width:480px');
+    expect(Math.round(box(fixed, '.editor').height), '부모에 높이를 주면 살아난다').toBeGreaterThan(200);
+  });
+});

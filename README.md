@@ -50,6 +50,12 @@ Monaco Editor 기반 코드 에디터 컴포넌트입니다.
 | `fontSize` | `number` | `14` | 폰트 크기(px) |
 | `value` | `string` | `""` | 에디터 내용 |
 
+**크기:** **호스트 상자가 크기를 정합니다** — `:host` 가 `width: 100%; height: 100%` 이고 편집 영역은 머리글을 뺀 나머지입니다(Monaco 가 `automaticLayout` 으로 따라옵니다). `height` 프로퍼티는 없으니 요소나 부모에 CSS 로 높이를 주세요.
+
+⚠**부모에 자기 높이가 없으면 `height: 100%` 가 무효가 되어 편집 영역이 몇 px 로 붕괴합니다** — 오류도 콘솔 경고도 없이 머리글과 빈 띠만 남습니다. 부모에 높이를 주거나 요소에 직접 주세요. `headless` 면 머리글이 없어 편집 영역이 호스트 상자 전체입니다.
+
+⚠`u-text-editor` 는 반대입니다 — 거기서는 `height` 프로퍼티가 편집 영역을 정하고 호스트 CSS `height` 는 그것을 바꾸지 않습니다. 한쪽에서 되던 레이아웃이 다른 쪽에 그대로 옮겨지지 않습니다.
+
 ### `u-text-editor` (UTextEditor)
 
 Quill.js 기반 리치 텍스트(WYSIWYG) 에디터 컴포넌트입니다.
@@ -74,8 +80,14 @@ Quill.js 기반 리치 텍스트(WYSIWYG) 에디터 컴포넌트입니다.
 | `readOnly` | `boolean` | `false` | 읽기 전용 모드 |
 | `placeholder` | `string` | `"Start writing..."` | 플레이스홀더 텍스트 |
 | `value` | `string` | `""` | 에디터 HTML 내용 |
-| `height` | `number` | `300` | 에디터 높이(px) |
+| `height` | `number` | `300` | **편집 영역** 높이(px) — 아래 「크기」 참조 |
 | `toolbar` | `string[][]` | 기본 툴바 | 커스텀 툴바 설정 |
+
+**크기:** `height` 는 **편집 영역**의 높이(px)이고, 호스트 상자는 거기에 헤더가 더해진 크기입니다(`height="300"` → 약 349px = 헤더 48 + 300 + 테두리 · `headless` 면 헤더 없음).
+
+🔴**호스트에 CSS `height` 를 줘도 편집 영역은 바뀌지 않습니다.** 호스트 상자만 바뀌므로, 작게 주면 편집 영역이 상자 밖으로 넘치고(일부러 자르지 않습니다 — Quill 의 떠 있는 UI 인 선택기 목록·링크 툴팁이 상자를 벗어날 수 있어야 합니다) 크게 주거나 `height: 100%` 로 주면 아래에 빈 공간이 남습니다. 부모 높이를 채우려면 CSS 가 아니라 `height` 프로퍼티로 넘기세요.
+
+⚠`u-code-editor` 는 반대입니다 — `height` 프로퍼티가 없고 호스트 상자를 채웁니다(`height: 100%`). 한쪽에서 되던 레이아웃이 다른 쪽에 그대로 옮겨지지 않습니다.
 
 **Methods:**
 
@@ -97,6 +109,7 @@ Quill.js 기반 리치 텍스트(WYSIWYG) 에디터 컴포넌트입니다.
 ## 개발
 
 ```bash
-npm test         # Vite 개발 서버 (컴포넌트 프리뷰)
-npm run build    # 프로덕션 빌드 (eslint + vite)
+npm run preview  # Vite 개발 서버 (컴포넌트 프리뷰)
+npm test         # 테스트 (vitest — 브라우저 프로젝트, Chromium)
+npm run build    # 프로덕션 빌드 (typecheck + eslint + vite)
 ```

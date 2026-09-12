@@ -102,4 +102,29 @@ describe('u-text-editor 배치', () => {
     const headless = await mount('style="width:480px" height="120" headless');
     expect(parseFloat(getComputedStyle(headless.shadowRoot!.querySelector('.ql-toolbar')!).borderTopLeftRadius)).toBeGreaterThan(0);
   });
+
+  /**
+   * 높이의 «주인» — cycle-560. 호스트 CSS 높이는 호스트 «상자» 만 바꾸고 편집 영역은 `height` 프로퍼티가 정한다.
+   * 형제 `u-code-editor` 는 정반대(`height` 프로퍼티가 없고 `:host{height:100%}` 로 상자를 채운다)라, 한쪽을 먼저 쓴
+   * 소비자가 다른 쪽에 같은 레이아웃을 옮기면 조용히 어긋난다 — 그래서 계약을 문서에 적고 여기서 고정한다.
+   */
+  it('🔴호스트 CSS 높이를 작게 줘도 편집 영역은 줄지 않고, 넘친 부분이 잘리지도 않는다', async () => {
+    const el = await mount('style="width:480px;height:150px" height="300"');
+    const root = el.shadowRoot!;
+    const target = root.querySelector('.ql-editor')!;
+    expect(Math.round(rect(el).height), '호스트 상자는 CSS 를 따른다').toBe(150);
+    expect(Math.round(rect(root.querySelector('.editor')!).height), '편집 영역은 height 프로퍼티를 따른다').toBe(300);
+    expect(getComputedStyle(el).overflow, '자르면 넘친 줄을 읽을 수도 누를 수도 없다').toBe('visible');
+    expect(rect(target).bottom, '이 사례는 편집 영역이 상자 밖으로 나가야 의미가 있다').toBeGreaterThan(rect(el).bottom);
+    const hit = pressCenter(target);
+    expect(hit !== null && (hit === target || target.contains(hit)), '상자 밖으로 넘친 편집 영역이 실제로 눌린다').toBe(true);
+  });
+
+  it('호스트 CSS 높이를 크게 줘도 편집 영역은 늘지 않는다 — 부모를 채우려면 `height` 로 넘긴다', async () => {
+    const el = await mount('style="width:480px;height:500px" height="300"');
+    const box = rect(el.shadowRoot!.querySelector('.editor')!);
+    expect(Math.round(rect(el).height)).toBe(500);
+    expect(Math.round(box.height), 'CSS 높이는 편집 영역을 늘리지 않는다').toBe(300);
+    expect(rect(el).bottom - box.bottom, '아래에 빈 공간이 남는다').toBeGreaterThan(100);
+  });
 });

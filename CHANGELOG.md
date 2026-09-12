@@ -66,6 +66,12 @@
   nor clicked. They now extend past the component like any popup. The rounded corners are kept
   by the header — or the toolbar when `headless` — rounding its own top corners.
 
+- **The code editor now uses its full height.** The editing area was sized as the component's
+  height minus a fixed 32px for the header, but the header is 24px tall, so 8px along the bottom
+  was never used. The header and the editing area now divide the height by layout, so the editing
+  area is whatever the header leaves — at any header size. The component's overall size is
+  unchanged; only the editor inside it grows.
+
 ## [0.3.3] - 2026-08-25
 
 ### Added

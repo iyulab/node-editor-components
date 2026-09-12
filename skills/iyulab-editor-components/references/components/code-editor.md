@@ -29,6 +29,30 @@ Monaco Editor wrapped as a custom element. Syntax highlighting, per-language con
 | `fontSize` | `number` | `14` | — | Editor font size in pixels |
 | `value` | `string` | `''` | — | Current text content |
 
+## Sizing
+
+**The host box owns the size.** `:host` is `width: 100%; height: 100%`, and the editing area is
+whatever the header leaves — Monaco re-layouts into it (`automaticLayout`). There is no `height`
+property: size the element, or give its parent a height.
+
+```html
+<!-- ✓ the parent has a height, so the editor fills it -->
+<div style="height: 400px"><u-code-editor></u-code-editor></div>
+
+<!-- ✓ or size the element itself -->
+<u-code-editor style="height: 400px"></u-code-editor>
+```
+
+⚠ **In a parent that has no height of its own, `height: 100%` resolves to nothing and the editing
+area collapses to a few pixels** — you get the header and an empty strip, with no error and nothing
+in the console. Give the parent a height, or set one on the element.
+
+`headless` removes the header, so the editing area is then the whole host box.
+
+⚠ `u-text-editor` is the opposite: there, a `height` property sizes the editing area and a CSS
+`height` on the host does *not* change it. A layout that works for one does not transfer to the
+other unchanged.
+
 ## Slots
 
 | Name | Description |
@@ -43,4 +67,4 @@ Monaco Editor wrapped as a custom element. Syntax highlighting, per-language con
 
 ## CSS Custom Properties
 
-None. `UCodeEditor.styles.ts` only sets a private layout variable (`--header-height`, not documented as a consumer override point) and otherwise relies on Monaco's own theme (`vs-light`/`vs-dark`) rather than this library's `--u-*` design tokens.
+None. Layout is plain flexbox — the header keeps its own height and the editing area takes the rest — so there is no layout variable to override (see [Sizing](#sizing) for how the element is sized), and colours come from Monaco's own theme (`vs-light`/`vs-dark`) rather than this library's `--u-*` design tokens.

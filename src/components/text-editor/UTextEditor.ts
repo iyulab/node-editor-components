@@ -31,7 +31,16 @@ export class UTextEditor extends UElement {
   @property({ type: String }) placeholder: string = "Start writing...";  
   /** The current HTML content of the rich text editor. @default "" */
   @property({ type: String }) value: string = "";
-  /** The height of the editor in pixels. @default 300 */
+  /**
+   * 편집 영역의 높이(px). 호스트 상자는 여기에 머리글이 더해진 크기다(`headless` 면 머리글 없음).
+   *
+   * 🔴**호스트에 CSS `height` 를 줘도 편집 영역은 바뀌지 않는다** — 호스트 상자만 바뀌어서, 작으면
+   * 편집 영역이 상자 밖으로 넘치고(자르지 않는다 — 시트 머리의 `:host` 주석) 크면 아래가 빈다.
+   * 부모를 채우려면 CSS 가 아니라 이 프로퍼티로 넘긴다. 계약은
+   * `tests/browser/text-editor-layout.browser.test.ts` 가 고정한다.
+   *
+   * @default 300
+   */
   @property({ type: Number }) height: number = 300;
   /** Custom toolbar configuration. If not provided, uses default toolbar. */
   @property({ type: Array }) toolbar?: string[][];
