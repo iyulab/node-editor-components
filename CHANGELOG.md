@@ -4,6 +4,14 @@
 
 ### Changed
 
+- **`u-text-editor`'s height is now owned by the host box, like `u-code-editor`'s.** A CSS
+  `height` or `max-height` on the host keeps the header fixed and gives the editing area the
+  rest; `height: 100%` fills a parent. The `height` property remains as the editing area's
+  default when the host has no constraint, so a plain `<u-text-editor>` renders exactly as
+  before. Previously the property was the only way to size the editor and host CSS was ignored
+  — the two editors had opposite contracts, and a layout that worked on one silently broke on
+  the other. Floating Quill UI (pickers, the link tooltip) still escapes the box; nothing clips.
+
 - **`monaco-editor` peer range moves to `^0.56.0`** (was `^0.55.1`). 0.56 added an `exports` map
   that rewrites every subpath to `./esm/vs/*.js`, which broke both things this component used to
   resolve from the consumer's install: the worker entry points (`monaco-editor/esm/vs/...` now

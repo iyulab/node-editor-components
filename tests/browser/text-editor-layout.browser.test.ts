@@ -104,27 +104,43 @@ describe('u-text-editor 배치', () => {
   });
 
   /**
-   * 높이의 «주인» — cycle-560. 호스트 CSS 높이는 호스트 «상자» 만 바꾸고 편집 영역은 `height` 프로퍼티가 정한다.
-   * 형제 `u-code-editor` 는 정반대(`height` 프로퍼티가 없고 `:host{height:100%}` 로 상자를 채운다)라, 한쪽을 먼저 쓴
-   * 소비자가 다른 쪽에 같은 레이아웃을 옮기면 조용히 어긋난다 — 그래서 계약을 문서에 적고 여기서 고정한다.
+   * 높이의 «주인» — 호스트 상자다(HD-60 ⒜, cycle-583). 종전(cycle-560)에는 `height` 프로퍼티가 주인이고 호스트 CSS
+   * 높이는 상자만 바꿨다 — 형제 `u-code-editor` 와 정반대라, 한쪽을 먼저 쓴 소비자가 다른 쪽에 같은 레이아웃을 옮기면
+   * 조용히 어긋났다. 이제 둘이 같은 계약이다: 호스트에 높이를 주면 머리글은 고정, 편집 영역이 나머지를 채운다.
+   * `height` 프로퍼티는 «제약이 없을 때의 기본» 으로 남는다.
    */
-  it('🔴호스트 CSS 높이를 작게 줘도 편집 영역은 줄지 않고, 넘친 부분이 잘리지도 않는다', async () => {
+  it('🔴호스트 CSS 높이를 작게 주면 편집 영역이 그 안에서 머리글을 뺀 나머지로 줄어든다', async () => {
     const el = await mount('style="width:480px;height:150px" height="300"');
     const root = el.shadowRoot!;
-    const target = root.querySelector('.ql-editor')!;
+    const header = rect(root.querySelector('.header')!);
+    const editor = rect(root.querySelector('.editor')!);
     expect(Math.round(rect(el).height), '호스트 상자는 CSS 를 따른다').toBe(150);
-    expect(Math.round(rect(root.querySelector('.editor')!).height), '편집 영역은 height 프로퍼티를 따른다').toBe(300);
-    expect(getComputedStyle(el).overflow, '자르면 넘친 줄을 읽을 수도 누를 수도 없다').toBe('visible');
-    expect(rect(target).bottom, '이 사례는 편집 영역이 상자 밖으로 나가야 의미가 있다').toBeGreaterThan(rect(el).bottom);
-    const hit = pressCenter(target);
-    expect(hit !== null && (hit === target || target.contains(hit)), '상자 밖으로 넘친 편집 영역이 실제로 눌린다').toBe(true);
+    expect(Math.round(header.height + editor.height), '머리글 + 편집 영역 = 호스트 안쪽 높이').toBe(el.clientHeight);
+    expect(editor.height, '편집 영역이 height 프로퍼티(300)를 버리고 줄었다').toBeLessThan(150);
+    expect(Math.round(editor.bottom), '넘치지 않는다').toBeLessThanOrEqual(Math.round(rect(el).bottom));
   });
 
-  it('호스트 CSS 높이를 크게 줘도 편집 영역은 늘지 않는다 — 부모를 채우려면 `height` 로 넘긴다', async () => {
+  it('호스트 CSS 높이를 크게 주면 편집 영역이 나머지를 채운다 — 아래에 빈 공간이 남지 않는다', async () => {
     const el = await mount('style="width:480px;height:500px" height="300"');
-    const box = rect(el.shadowRoot!.querySelector('.editor')!);
+    const root = el.shadowRoot!;
+    const box = rect(root.querySelector('.editor')!);
     expect(Math.round(rect(el).height)).toBe(500);
-    expect(Math.round(box.height), 'CSS 높이는 편집 영역을 늘리지 않는다').toBe(300);
-    expect(rect(el).bottom - box.bottom, '아래에 빈 공간이 남는다').toBeGreaterThan(100);
+    expect(box.height, '편집 영역이 300 을 넘어 자랐다').toBeGreaterThan(400);
+    expect(Math.round(rect(el).bottom - box.bottom), '빈 공간 0(테두리뿐)').toBeLessThanOrEqual(1);
+  });
+
+  it('NEGATIVE: 호스트에 높이가 없으면 편집 영역은 height 프로퍼티(기본 300)로 서고 호스트는 그 합만큼 자란다', async () => {
+    const el = await mount('style="width:480px"');
+    const root = el.shadowRoot!;
+    const header = rect(root.querySelector('.header')!);
+    const editor = rect(root.querySelector('.editor')!);
+    expect(Math.round(editor.height)).toBe(300);
+    expect(el.clientHeight).toBe(Math.round(header.height + 300));
+  });
+
+  it('headless 면 편집 영역이 호스트 안쪽 전체다', async () => {
+    const el = await mount('style="width:480px;height:200px" headless');
+    const editor = rect(el.shadowRoot!.querySelector('.editor')!);
+    expect(Math.round(editor.height)).toBe(el.clientHeight);
   });
 });

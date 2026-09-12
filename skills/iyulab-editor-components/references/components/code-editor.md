@@ -49,8 +49,7 @@ in the console. Give the parent a height, or set one on the element.
 
 `headless` removes the header, so the editing area is then the whole host box.
 
-⚠ `u-text-editor` is the opposite: there, a `height` property sizes the editing area and a CSS
-`height` on the host does *not* change it. A layout that works for one does not transfer to the
+`u-text-editor` shares this contract since 0.5.0; its `height` property is only the editing area's default when the host has no constraint.
 other unchanged.
 
 ## Slots

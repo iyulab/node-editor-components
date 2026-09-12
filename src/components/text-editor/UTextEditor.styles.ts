@@ -25,14 +25,19 @@ export const styles = css`
   /* 호스트는 자르지 않는다 — Quill 의 떠 있는 UI(선택기 목록 · 링크 툴팁)는 편집기 상자 밖으로 나갈 수 있어야 한다.
      종전 overflow: hidden 은 짧은 편집기에서 그것들을 잘라 누를 수 없게 만들었다. 둥근 모서리는 배경을 칠하는
      머리글(과 머리글이 없을 때의 툴바)이 자기 위 모서리를 둥글게 해서 지킨다. */
+  /* 세로 flex 인 이유 — 호스트 상자가 높이의 주인이다(형제 u-code-editor 와 같은 계약, HD-60).
+     소비자가 호스트에 CSS 높이를 주면 머리글은 고정이고 편집 영역이 나머지를 채운다. 주지 않으면
+     편집 영역은 자기 기본 높이(height 프로퍼티)로 서고 호스트는 그 합만큼 자란다 — 종전과 같은 모습이다. */
   :host {
-    display: block;
+    display: flex;
+    flex-direction: column;
     border: 1px solid var(--u-border-color, #E0E0E0);
     border-radius: var(--u-radius-md, 4px);
     background: var(--u-panel-bg-color, #FFFFFF);
   }
 
   .header {
+    flex: none;
     display: flex;
     align-items: center;
     padding: 12px 20px;
@@ -58,9 +63,12 @@ export const styles = css`
 
   .editor {
     position: relative;
-    /* 이 값은 «호스트 CSS 높이를 따르는 것» 이 아니라 렌더의 인라인 style 이 항상 덮는 폴백이다 —
-       높이의 주인은 height 프로퍼티이고, 그 JSDoc 이 계약을 적는다. (주석에도 백틱을 쓰지 않는다 — css 템플릿이 그 자리에서 끝난다.) */
+    /* 렌더의 인라인 style 이 height 프로퍼티 값으로 덮는 폴백이다. flex-basis 가 auto 라 그 값은
+       «제약이 없을 때의 기본 높이» 가 된다 — 호스트에 높이가 있으면 아래 flex 규칙이 이 값을 이긴다.
+       (주석에도 백틱을 쓰지 않는다 — css 템플릿이 그 자리에서 끝난다.) */
     height: 300px;
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   .quill-container {

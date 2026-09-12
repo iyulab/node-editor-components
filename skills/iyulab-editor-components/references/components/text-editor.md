@@ -26,30 +26,31 @@ Rich text editor built on [Quill](https://quilljs.com/). Reads and writes HTML, 
 | `readOnly` | `boolean` | `false` | — | Prevents user input |
 | `placeholder` | `string` | `'Start writing...'` | — | Placeholder shown when empty |
 | `value` | `string` | `''` | — | Current content as HTML |
-| `height` | `number` | `300` | — | Height of the **editing area** in pixels — see [Sizing](#sizing) |
+| `height` | `number` | `300` | — | Editing-area height in pixels **when the host has no height constraint** — see [Sizing](#sizing) |
 | `toolbar` | `string[][]` | `undefined` | — | Custom toolbar configuration. When left unset, falls back at runtime to Quill's default 14-group toolbar (not a declared property default) |
 
 ## Sizing
 
-`height` sets the **editing area**. The host box is that plus the header, so `height="300"` renders
-an element about 349px tall (48px header + 300px + border); `headless` removes the header.
+**The host box owns the height** (since 0.5.0 — the same contract as `u-code-editor`). Give the
+host a CSS `height` or `max-height` and the header stays fixed while the editing area takes the
+rest; `height: 100%` fills a parent. `height` (the property) is the editing area's **default**
+when the host has no constraint: a plain `<u-text-editor>` is about 349px tall (48px header +
+300px + border), `headless` removes the header.
 
-**A CSS `height` on the host does not resize the editing area** — it resizes only the host box. Set
-it smaller and the editing area overflows past the box, and is deliberately *not* clipped, because
-Quill's floating UI (picker lists, the link tooltip) has to be able to leave it. Set it larger — or
-use `height: 100%` — and empty space is left below. So express a parent-filling layout through the
-property, not CSS:
+The host never clips — Quill's floating UI (picker lists, the link tooltip) has to be able to
+leave the box.
 
 ```html
-<!-- ✗ the host box becomes 150px; the editing area stays 300px and overflows it -->
-<u-text-editor style="height: 150px" height="300"></u-text-editor>
+<!-- ✓ the parent has a height, so the editor fills it (header + editing area = 400px) -->
+<div style="height: 400px"><u-text-editor style="height: 100%"></u-text-editor></div>
 
-<!-- ✓ -->
-<u-text-editor .height=${containerHeight - 48}></u-text-editor>
+<!-- ✓ no constraint: the editing area is 300px by default, or whatever height says -->
+<u-text-editor height="200"></u-text-editor>
 ```
 
-⚠ `u-code-editor` is the opposite: it has no `height` property and fills the host box
-(`height: 100%`). A layout that works for one does not transfer to the other unchanged.
+⚠ Until 0.4.x the contract was the opposite (the property was the only way to size the editor and
+host CSS was ignored). A layout that relied on host CSS *not* reaching the editing area changes
+with 0.5.0 — see the CHANGELOG.
 
 ## Methods
 
