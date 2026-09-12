@@ -4,6 +4,13 @@
 
 ### Changed
 
+- **The rich text editor's colour swatches and link tooltip actions are now large enough to hit**
+  (WCAG 2.2 SC 2.5.8, 24×24 CSS px). Quill draws them at 16×16 (swatches) and 19px tall (*Edit* and
+  *Remove* in the link tooltip); the component now overrides both — swatches are 24×24, which makes
+  the colour palette wider (206px), and the tooltip actions are laid out as blocks so their 26px
+  line height is their real height. What you see is the editor this package ships, so its targets
+  follow this package's rules even where a dependency drew them.
+
 - **Fallback literals for `--u-txt-color-weak` follow `@iyulab/components` 1.40.0.** They are
   only used when that stylesheet is not loaded; with it, nothing changes here.
 

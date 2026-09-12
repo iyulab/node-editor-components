@@ -114,6 +114,22 @@ export const styles = css`
     color: var(--u-txt-color, #212121);
   }
 
+  /* 🔴Quill 이 그리는 타깃의 치수 — 우리가 덮어쓴다(사람 결정 HD-58 ⒜). 소비자가 보는 것은 우리 컴포넌트이고,
+     WCAG 2.2 SC 2.5.8 은 «누가 그렸는가» 를 묻지 않는다.
+     ⑴ 색 견본 16×16(붙어 있어 간격 예외도 서지 않는다) → 24×24 · 한 줄 일곱 칸이라 목록 폭도 함께(7×(24+4)+10).
+     ⑵ 링크 툴팁의 Edit·Remove 는 줄 높이가 26 인데 인라인이라 실제 높이가 19 였다 → inline-block 으로 26. */
+  .ql-snow .ql-color-picker .ql-picker-item {
+    width: 24px;
+    height: 24px;
+  }
+  .ql-snow .ql-color-picker .ql-picker-options {
+    width: 206px;
+  }
+  .ql-snow .ql-tooltip a.ql-action,
+  .ql-snow .ql-tooltip a.ql-remove {
+    display: inline-block;
+  }
+
   .ql-toolbar .ql-stroke {
     stroke: var(--u-txt-color-weak, #616161);
   }
