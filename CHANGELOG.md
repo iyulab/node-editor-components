@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.5.0] - 2026-09-13
+
+### Changed
+
+- **`monaco-editor` peer range moves to `^0.56.0`** (was `^0.55.1`). 0.56 added an `exports` map
+  that rewrites every subpath to `./esm/vs/*.js`, which broke both things this component used to
+  resolve from the consumer's install: the worker entry points (`monaco-editor/esm/vs/...` now
+  resolves to `esm/vs/esm/vs/...`) and the structural stylesheet
+  (`monaco-editor/min/vs/editor/editor.main.css` is still on disk but can no longer be named).
+  The two versions need different specifiers, so one package cannot serve both — this release
+  follows the current monaco.
+  - Workers are loaded through the 0.56 form (`monaco-editor/editor/editor.worker.js`,
+    `monaco-editor/language/<lang>/<lang>.worker.js`).
+  - **The structural CSS is now baked into this package at build time** instead of being resolved
+    from the consumer's monaco. A consumer no longer resolves any monaco path on this package's
+    behalf; in exchange, the baked structure belongs to the monaco this package was built with,
+    which is why the peer range is one minor wide. Theme and token rules are unaffected — monaco
+    injects those into the shadow root itself.
+  - Nothing changes in the component's API, events or rendered contract; the eight browser
+    contract tests pass unchanged against 0.56.
+
 ## [0.4.0] - 2026-09-10
 
 ### Changed

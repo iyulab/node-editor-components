@@ -2,6 +2,7 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import react from '@iyulab/components/plugins/vite-plugin-react-wrapper.js';
+import { monacoStructureCss } from './tooling/monaco-structure-css.js';
 
 export default defineConfig({
   // 개발 서버 설정
@@ -40,6 +41,7 @@ export default defineConfig({
     }
   },
   plugins: [
+    monacoStructureCss(),
     dts({
       include: ["src/**/*"]
     }),

@@ -4,7 +4,7 @@ import { createRef, ref, type Ref } from "lit/directives/ref.js";
 
 import * as monaco from "monaco-editor";
 import "./UCodeEditor.worker.js";
-import monacoStyles from "monaco-editor/min/vs/editor/editor.main.css?inline";
+import monacoStyles from "virtual:monaco-structure-css";
 
 import { Theme } from "@iyulab/components/dist/utilities/Theme.js";
 import { UElement } from "@iyulab/components/dist/components/UElement.js";

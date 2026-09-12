@@ -44,7 +44,8 @@
     "src/**/*",
     "tests/**/*",
     "vite.config.ts",
-    "vite-env.d.ts"
+    "vite-env.d.ts",
+    "tooling/**/*"
   ],
   "exclude": [
     "node_modules",

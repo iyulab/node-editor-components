@@ -374,6 +374,13 @@ beforeAll(async () => {
   await import('../../src/index.js');
   customElements.define = original;
 
+  // 배럴이 끌어오는 «의존성» 도 자기 엘리먼트를 등록한다 — monaco 0.56 이 `connection-observer`
+  // 를 정의한다(형제 게이트가 Vite 의 `vite-error-overlay` 를 거르는 것과 같은 자리). 우리
+  // 컴포넌트는 전부 `u-` 접두라 그 접두로 소유를 가른다 — ***도출은 «우리 것만» 을 뜻하지 않는다.***
+  const ours = registered.filter((t) => t.startsWith('u-'));
+  registered.length = 0;
+  registered.push(...ours);
+
   // 형제가 실제로 무언가를 등록했는지 확인한다 — 0 이면 위 «걸러내기»가 아무 일도 하지 않은
   // 것이고, 그러면 아래 분류표에 남의 태그가 섞여 들어와도 알 방법이 없다.
   if (foreign === 0) throw new Error('형제 배럴이 아무 태그도 등록하지 않았다 — 소유 판정이 무의미하다');
