@@ -87,6 +87,8 @@ export class UTextEditor extends UElement {
       }
     });
 
+    this.enhanceLinkTooltipKeyboard(this.quill);
+
     // Set initial content — innerHTML 직접 변이는 Quill MutationObserver가 source='user'로
     // 오인해 text-change를 발화시키므로, silent source의 setContents로 주입한다.
     if (this.value) {
@@ -112,6 +114,28 @@ export class UTextEditor extends UElement {
         bubbles: true,
         composed: true
       }));
+    });
+  }
+
+  /**
+   * snow 테마의 링크 툴팁은 «Edit/Save» 와 «Remove» 를 `href` 없는 `<a>` 로 그린다 — 포커스를 받지 못하고 Enter 로 눌리지
+   * 않아 키보드로는 링크를 편집·제거할 수 없었다(Quill 마크업이라 우리 템플릿 밖이다). Quill 이 붙인 클릭 처리는 그대로 두고,
+   * 두 앵커를 버튼 역할·탭 정지로 드러내고 Enter/Space 를 클릭으로 옮긴다. 이름은 테마 시트의 생성 콘텐츠(`Edit`·`Remove`)다.
+   */
+  private enhanceLinkTooltipKeyboard(quill: Quill) {
+    const root = (quill.theme as unknown as { tooltip?: { root?: HTMLElement } }).tooltip?.root;
+    if (!root) return;
+    const ACTIONS = 'a.ql-action, a.ql-remove';
+    for (const a of Array.from(root.querySelectorAll<HTMLElement>(ACTIONS))) {
+      a.setAttribute('role', 'button');
+      a.setAttribute('tabindex', '0');
+    }
+    root.addEventListener('keydown', (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if ((e.key === 'Enter' || e.key === ' ') && target.matches(ACTIONS)) {
+        e.preventDefault();
+        target.click();
+      }
     });
   }
 

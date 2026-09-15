@@ -304,8 +304,7 @@ const INLINE_PROSE = new Set<string>([]);
  * 고치면 빼는 것이 완료 신호다. 새로 넣을 때는 왜 지금 고치지 않는지를 함께 적는다.
  */
 const POINTER_ORPHAN_PINS = new Set<string>([
-  'a.ql-action', // Quill 링크 툴팁의 «편집/저장» — `href` 없는 앵커(Quill 이 그리는 마크업) · 우리 쪽 보강 가능 여부 확인 전
-  'a.ql-remove', // 같은 툴팁의 «제거»
+  // ✅비어 있다 — 도입 시점의 둘(Quill 링크 툴팁의 `href` 없는 `a.ql-action`·`a.ql-remove`)은 버튼 역할·탭 정지·Enter/Space 로 보강했다.
 ]);
 
 interface Fixture {

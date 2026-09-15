@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.1] - 2026-09-15
+
+### Fixed
+
+- **A link could not be edited or removed from the keyboard in `u-text-editor`.** The link
+  tooltip's **Edit**/**Save** and **Remove** controls are anchors without `href`, drawn by Quill, so
+  they took no focus. They are now exposed as buttons in the tab order, and Enter or Space activates
+  them (Quill's own click handling is unchanged).
+
 ## [0.5.0] - 2026-09-13
 
 ### Changed
