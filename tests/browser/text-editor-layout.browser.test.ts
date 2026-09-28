@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import '../../src/components/text-editor/UTextEditor.js';
 
 /**
- * `u-text-editor` 배치 — **편집 영역은 상자 안에, 떠 있는 UI 는 상자 밖으로도** (cycle-557).
+ * `u-text-editor` 배치 — **편집 영역은 상자 안에, 떠 있는 UI 는 상자 밖으로도**.
  *
  * 타깃 크기 게이트의 hit-test 축이 두 결함을 찾았다:
  * ⑴ 편집 영역을 `height - 42px` 로 줬다 — 툴바 높이를 42px 로 **가정**했는데, 좁으면 툴바가 여러 줄로 접혀(폭 480 에서
@@ -104,7 +104,7 @@ describe('u-text-editor 배치', () => {
   });
 
   /**
-   * 높이의 «주인» — 호스트 상자다(HD-60 ⒜, cycle-583). 종전(cycle-560)에는 `height` 프로퍼티가 주인이고 호스트 CSS
+   * 높이의 «주인» — 호스트 상자다. 종전에는 `height` 프로퍼티가 주인이고 호스트 CSS
    * 높이는 상자만 바꿨다 — 형제 `u-code-editor` 와 정반대라, 한쪽을 먼저 쓴 소비자가 다른 쪽에 같은 레이아웃을 옮기면
    * 조용히 어긋났다. 이제 둘이 같은 계약이다: 호스트에 높이를 주면 머리글은 고정, 편집 영역이 나머지를 채운다.
    * `height` 프로퍼티는 «제약이 없을 때의 기본» 으로 남는다.

@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 /**
  * **WCAG 2.2 SC 2.5.8 Target Size (Minimum) — 24×24 CSS px** 게이트.
  *
- * `@iyulab/components`(cycle-479~492) → `chat-components`(496) → `data-components`(497)를
+ * `@iyulab/components` → `chat-components`(496) → `data-components`(497)를
  * 거쳐 이식했다. 판정 규칙·간격 예외·형제 태그 걸러내기는 **같은 형태**다.
  *
  * ## 🔴 이 패키지의 조작부는 «우리가 그리지 않는다»
@@ -18,7 +18,7 @@ import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
  * 숫자를 남긴다. 미달이 나오면 그때 «서드파티 표면을 어떻게 다룰 것인가»가 사람 판단으로
  * 올라간다 — 재지 않으면 그 질문 자체가 생기지 않는다.
  *
- * ## 상태별 픽스처 · hit-test 축 (cycle-557)
+ * ## 상태별 픽스처 · hit-test 축
  *
  * 다른 세 게이트(components · chat · data)와 같은 형태로 올렸다 — `Fixture[]`·`state`·`prepare`, 상태 수를 세는
  * 커버리지, 상태 단위 핀, 그리고 크기보다 먼저 «실제로 눌리는가» 를 재는 hit-test 블록(정본 = components 게이트 ·
@@ -64,20 +64,20 @@ function inShadow(host: Element, sel: string): Element[] {
 }
 
 /**
- * 🔴**hit-test 축**(cycle-553 · 세 게이트 공통) — 타깃의 중심과 1px 안쪽 네 가장자리를 실제로 누르면 그 타깃이 받는가.
+ * 🔴**hit-test 축**(세 게이트 공통) — 타깃의 중심과 1px 안쪽 네 가장자리를 실제로 누르면 그 타깃이 받는가.
  *
  * `getBoundingClientRect` 는 조상의 `overflow` 가 자른 부분도, 닫혀서 보이지 않는 요소의 박스도 그대로 보고한다 — 크기만
  * 재면 ***보이지도 눌리지도 않는 타깃이 통과한다.*** 실제로 그랬다: components 게이트의 `u-input` 접미 아이콘(좁은 필드에서
  * 밖으로 밀려나 잘렸다)과, 닫힌 채 띄운 대화상자 픽스처(닫기 버튼 중심을 누르면 `body` 가 받았다).
  *
  * - **사용자가 스크롤로 닿을 수 있으면 닿는 것이다** — 점마다, 그 점이 보이도록 `overflow: auto|scroll` 조상과 창만 스크롤한
- *   뒤 잰다(cycle-554: 표·시트·블록이 러너의 좁은 뷰포트를 넘어 `elementFromPoint` 가 `null` 을 돌려줬고, 뷰포트보다 넓은
+ *   뒤 잰다(표·시트·블록이 러너의 좁은 뷰포트를 넘어 `elementFromPoint` 가 `null` 을 돌려줬고, 뷰포트보다 넓은
  *   타깃은 양 끝을 한 화면에 담을 수 없다). `overflow: hidden|clip` 조상은 사용자가 움직일 수 없으므로 **건드리지 않는다** —
  *   `scrollIntoView` 는 그것까지 스크롤해 잘린 타깃을 통과시킨다. 움직인 스크롤은 점마다 돌려놓는다.
  * - 판정은 타깃이 속한 트리(`getRootNode()`)에서 한다. 그 트리로 retarget 되어 **호스트**가 돌아오면, 그 점이 타깃 안
  *   `<slot>` 에 꽂힌 라이트 DOM 내용 위일 때 타깃이 받은 것으로 센다(링크 안에 꽂힌 글자 등).
  * - ⚠**이웃 타깃이 받은 것은 봐주지 않는다.** 붙어 있는 격자 셀의 경계선 때문에 가장자리를 이웃에 양보하는 면제를
- *   시험해 봤지만(cycle-554), 네거티브 컨트롤로 끄자 **어떤 픽스처도 빨개지지 않았다** — 셀 가장자리의 불일치는 경계선이
+ *   시험해 봤지만, 네거티브 컨트롤로 끄자 **어떤 픽스처도 빨개지지 않았다** — 셀 가장자리의 불일치는 경계선이
  *   아니라 뷰포트 밖이었다. 쓰이지 않는 면제는 조용한 미탐이라 걷어냈다. 필요해지면 그 픽스처가 빨강으로 알린다.
  *
  * ⚠이 헬퍼는 세 게이트(components · chat-components · data-components)에 **같은 코드로** 한 벌씩 있다 — 고치면 셋 다.
@@ -240,7 +240,7 @@ function slottedContentAt(el: Element, x: number, y: number): boolean {
  *
  * ⚠**규칙이라 손으로 쓴다** — 어떤 라벨이 «활성화»하는지는 도출이 아니라 우리 지식이다.
  * ⚠**체크박스·라디오에만** 적용한다: 텍스트 입력의 라벨까지 넓히면 정당한 미달을 숨기는
- * 쪽으로만 작용한다. `u-widgets` 게이트(cycle-493)가 같은 규칙을 같은 이유로 쓴다.
+ * 쪽으로만 작용한다. `u-widgets` 게이트가 같은 규칙을 같은 이유로 쓴다.
  */
 function resolveTarget(el: Element): Element {
   const input = el as HTMLInputElement;
@@ -264,7 +264,7 @@ const NOT_A_TARGET = new Set<string>([
 ]);
 
 /**
- * ✅**종전의 «로드 불가» 예외는 2026-09-10(cycle-522) 실측으로 해소됐다.**
+ * ✅**종전의 «로드 불가» 예외는 2026-09-10 실측으로 해소됐다.**
  *
  * 그 자리는 `u-code-editor` 가 `monaco-editor/min/vs/editor/editor.main.css?inline` 을
  * import 하는데 이 워크스페이스의 Vite 가 그것을 풀지 못한다는 것이었다. **지금은 풀린다** —
@@ -288,7 +288,7 @@ const NEEDS_FIXTURE = new Set<string>([]);
  * 여기 있는 동안 이 파일은 그것을 **미달로 단언**하므로 스위트는 초록이고, 치수를 올리면
  * 빨개진다 — 그때 이 집합에서 빼는 것이 완료 신호다. 태그 전체(`u-x`) 또는 한 상태(`u-x [상태]`)에 건다.
  */
-/* ✅**Quill 표면 둘의 핀은 `HD-58` ⒜ 채택으로 해소됐다**(2026-09-12) — 우리 시트가 색 견본을 24×24 로(목록 폭도 함께) ·
+/* ✅**Quill 표면 둘의 핀은 해소됐다**(2026-09-12) — 우리 시트가 색 견본을 24×24 로(목록 폭도 함께) ·
    툴팁의 Edit/Remove 를 `inline-block` 으로(줄 높이 26 이 실제 높이가 된다). 서드파티가 그리더라도 소비자가 보는 것은 우리 컴포넌트다. */
 const UNDERSIZED_PINS = new Set<string>([]);
 
@@ -329,7 +329,7 @@ interface Fixture {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // ⚠높이는 공개 API(`height` 속성)로 준다 — 호스트에 CSS 높이를 주는 것은 이 컴포넌트의 계약이 아니다(편집 영역은
-//   `height` 가 정한다). 종전 픽스처는 CSS 높이를 줘, 편집기 아래쪽이 상자 밖에 있었다(cycle-557 hit-test 가 찾았다).
+//   `height` 가 정한다). 종전 픽스처는 CSS 높이를 줘, 편집기 아래쪽이 상자 밖에 있었다(hit-test 가 찾았다).
 const EDITOR = '<u-text-editor style="width:480px" height="200"></u-text-editor>';
 
 /** 툴바의 한 선택기를 사용자 경로(라벨 `mousedown`)로 열고, `.ql-expanded` 가 붙을 때까지 기다린다 — 안 열리면 던진다. */
@@ -348,9 +348,9 @@ const FIXTURES: Record<string, Fixture | Fixture[]> = {
     {
       state: '툴바',
       // Quill 툴바의 버튼과 **선택기 라벨**(`.ql-picker-label` — 머리글 등 드롭다운을 여는 `span[role=button]`).
-      // ⚠종전 셀렉터 `.ql-toolbar button` 은 라벨을 놓쳤다(§D-57 표의 공백 — 셀렉터가 요소 이름을 전제했다).
+      // ⚠종전 셀렉터 `.ql-toolbar button` 은 라벨을 놓쳤다(셀렉터가 요소 이름을 전제했다).
       // ⚠**우리가 치수를 정하지 않는다**(색만 덮어쓴다 — `.ql-stroke`/`.ql-fill`) — 그럼에도 재는 이유는 머리말.
-      //   툴바 버튼은 서로 **붙어 있으므로** 간격 예외를 켠다(그 예외가 실제로 일하는 자리다 — cycle-496 이 세운 기준).
+      //   툴바 버튼은 서로 **붙어 있으므로** 간격 예외를 켠다(그 예외가 실제로 일하는 자리다).
       html: EDITOR,
       targets: () => inShadow(document.querySelector('u-text-editor')!, '.ql-toolbar button, .ql-toolbar .ql-picker-label'),
       spacingIsOurs: true,
@@ -427,7 +427,7 @@ beforeAll(async () => {
   const foreign = registered.length;
   registered.length = 0;
 
-  /* ✅**배럴을 임포트한다** — cycle-522 가 그 복구 조건(monaco import 해석)을 실측으로 확인해
+  /* ✅**배럴을 임포트한다** — 그 복구 조건(monaco import 해석)을 실측으로 확인해
      종전의 «로드 가능한 것만 직접 임포트» 후퇴를 되돌렸다. ⇒ 새 컴포넌트가 생기면 **여기를
      고치지 않아도** 이 게이트의 시야에 들어온다. */
   await import('../../src/index.js');
