@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.2] - 2026-09-30
+
+### Changed
+
+- **`monaco-editor` peer range is now `>=0.56.0 <0.58.0`** (was `^0.56.0`, which excluded 0.57).
+  0.57 is additive (new editor options and APIs, a DOMPurify update) and keeps the 0.56 `exports`
+  map this component depends on; the test suite now runs against 0.57. The range stays bounded so
+  an untested 0.58 is not accepted silently.
+- **Optional peers promise only the versions that are tested:** `@lit/react` is `^1.0.8` (was
+  `>=1.0.8`) and `react` is `^18.0.0 || ^19.0.0` (was `>=18.0.0`).
+
 ## [0.5.1] - 2026-09-15
 
 ### Fixed
