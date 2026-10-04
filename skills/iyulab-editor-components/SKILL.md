@@ -4,7 +4,6 @@ description: Editor web components — a Monaco-based code editor and a Quill-ba
 license: MIT
 metadata:
   author: iyulab
-  version: "0.3.3"
 ---
 
 # @iyulab/editor-components
