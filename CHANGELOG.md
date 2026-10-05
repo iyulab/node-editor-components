@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.6.1] - 2026-10-05
+
+### Fixed
+
+- **`@iyulab/editor-components/react` resolves.** The build has always emitted the React wrappers to
+  `dist/react/` and the README documents the subpath, but `exports` did not list it, so the import
+  failed with `ERR_PACKAGE_PATH_NOT_EXPORTED`. `./react` and `./react/*` are now exported, as in
+  the sibling packages.
+
 ## [0.6.0] - 2026-10-05
 
 ### Added

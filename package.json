@@ -1,7 +1,7 @@
 {
   "name": "@iyulab/editor-components",
   "description": "various editor components by iyulab",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "keywords": [
     "iyulab",
     "web-components",
@@ -43,7 +43,9 @@
     "./dist/*": {
       "types": "./src/*.d.ts",
       "import": "./src/*"
-    }
+    },
+    "./react": "./dist/react/index.js",
+    "./react/*": "./dist/react/*"
   },
   "scripts": {
     "preversion": "node -e \"if(require('fs').existsSync('../../scripts/preversion-check.mjs'))require('child_process').execFileSync('node',['../../scripts/preversion-check.mjs'],{stdio:'inherit'})\"",
