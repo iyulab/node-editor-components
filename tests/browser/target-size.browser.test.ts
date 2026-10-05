@@ -323,6 +323,11 @@ interface Fixture {
    * 쓰지 않는다»(크기로만 판정) — 고립 픽스처에 예외를 적용하면 무엇이든 통과한다.
    */
   spacingIsOurs?: true;
+  /**
+   * 판정하지 않지만 **간격 계산에는 넣는** 이웃 타깃. 간격 예외는 같은 상태의 타깃끼리만 재므로, 같은 픽스처에 함께 그려지는
+   * 다른 상태의 타깃(열린 목록 바로 위의 툴바 단추 등)이 보이지 않으면 미달 타깃이 «간격 예외» 로 통과한다.
+   */
+  spacingNeighbors?: (tag: string) => Element[];
   /** 렌더가 비동기인 컴포넌트(서드파티 초기화 등)를 위한 추가 대기(ms). */
   settle?: number;
 }
@@ -367,6 +372,9 @@ const FIXTURES: Record<string, Fixture | Fixture[]> = {
       prepare: (host) => openPicker(host, '.ql-size'),
       targets: () => inShadow(document.querySelector('u-text-editor')!, '.ql-size.ql-expanded .ql-picker-item'),
       spacingIsOurs: true,
+      // 열린 목록은 자기를 연 라벨 바로 아래 · 다른 툴바 단추 옆에 그려진다 — 그것들을 간격에 넣지 않으면 첫 줄 항목이
+      // 라벨과 겹치듯 붙어 있어도 «간격 예외» 를 받는다(flex-table 의 열 메뉴 단추 ↔ 리사이즈 핸들과 같은 형태).
+      spacingNeighbors: () => inShadow(document.querySelector('u-text-editor')!, '.ql-toolbar button, .ql-toolbar .ql-picker-label'),
     },
     {
       state: '선택기 열림 · 색',
@@ -375,6 +383,9 @@ const FIXTURES: Record<string, Fixture | Fixture[]> = {
       prepare: (host) => openPicker(host, '.ql-color'),
       targets: () => inShadow(document.querySelector('u-text-editor')!, '.ql-color.ql-expanded .ql-picker-item'),
       spacingIsOurs: true,
+      // 열린 목록은 자기를 연 라벨 바로 아래 · 다른 툴바 단추 옆에 그려진다 — 그것들을 간격에 넣지 않으면 첫 줄 항목이
+      // 라벨과 겹치듯 붙어 있어도 «간격 예외» 를 받는다(flex-table 의 열 메뉴 단추 ↔ 리사이즈 핸들과 같은 형태).
+      spacingNeighbors: () => inShadow(document.querySelector('u-text-editor')!, '.ql-toolbar button, .ql-toolbar .ql-picker-label'),
     },
     {
       state: '링크 툴팁',
@@ -641,8 +652,9 @@ describe('WCAG 2.2 SC 2.5.8 — 타깃 크기(최소) 게이트', () => {
           .filter(({ misses }) => misses.length > 0)
           .map(({ el, misses }) => `${describeEl(el)} — ${misses.map((m) => `${m.point}→${m.hit}`).join(' · ')}`);
         expect(unreachable, '누르면 다른 요소가 받는 타깃 — 잘렸거나 가려졌거나 닫혀 있다').toEqual([]);
+        const neighbors = (fixture.spacingNeighbors ? fixture.spacingNeighbors(tag) : []).map(measure);
         const verdicts = targets.map((t, i) =>
-          fixture.spacingIsOurs ? judge(t, targets.filter((_, j) => j !== i)) : judge(t, [t]),
+          fixture.spacingIsOurs ? judge(t, [...targets.filter((_, j) => j !== i), ...neighbors]) : judge(t, [t]),
         );
         const detail = `실측 ${targets.map((t) => `${Math.round(t.w)}x${Math.round(t.h)}`).join(' ')} · 판정 ${verdicts.join(' ')}`;
 
