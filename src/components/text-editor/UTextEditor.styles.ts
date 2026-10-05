@@ -128,16 +128,50 @@ export const styles = css`
      WCAG 2.2 SC 2.5.8 은 «누가 그렸는가» 를 묻지 않는다.
      ⑴ 색 견본 16×16(붙어 있어 간격 예외도 서지 않는다) → 24×24 · 한 줄 일곱 칸이라 목록 폭도 함께(7×(24+4)+10).
      ⑵ 링크 툴팁의 Edit·Remove 는 줄 높이가 26 인데 인라인이라 실제 높이가 19 였다 → inline-block 으로 26. */
+  /* 호스트 하한(--u-target-size)이 있으면 견본이 그 값 — 목록 폭은 같은 식(일곱 칸)을 따른다. 미설정이면 24 · 206. */
   .ql-snow .ql-color-picker .ql-picker-item {
-    width: 24px;
-    height: 24px;
+    width: max(24px, var(--u-target-size, 0px));
+    height: max(24px, var(--u-target-size, 0px));
   }
   .ql-snow .ql-color-picker .ql-picker-options {
-    width: 206px;
+    width: calc(7 * (max(24px, var(--u-target-size, 0px)) + 4px) + 10px);
   }
   .ql-snow .ql-tooltip a.ql-action,
   .ql-snow .ql-tooltip a.ql-remove {
     display: inline-block;
+  }
+
+  /* 호스트 하한(--u-target-size) — 미설정이면 아래 식은 전부 Quill 의 기본값(24·28·3px·5px …)으로 떨어진다.
+     아이콘·글자 크기는 그대로 두고 상자만 키운다: 버튼의 그림은 높이 100% 라 상자를 키우면 함께 커지므로
+     늘어난 만큼을 여백으로 받는다(그림 18×18 고정). */
+  .ql-snow.ql-toolbar button,
+  .ql-snow .ql-toolbar button {
+    height: max(24px, var(--u-target-size, 0px));
+    width: max(28px, var(--u-target-size, 0px));
+    padding: max(3px, calc((var(--u-target-size, 0px) - 18px) / 2)) max(5px, calc((var(--u-target-size, 0px) - 18px) / 2));
+  }
+  .ql-snow .ql-picker {
+    height: max(24px, var(--u-target-size, 0px));
+  }
+  .ql-snow .ql-picker-label::before {
+    line-height: calc(max(24px, var(--u-target-size, 0px)) - 2px);
+  }
+  .ql-snow .ql-color-picker,
+  .ql-snow .ql-icon-picker {
+    width: max(28px, var(--u-target-size, 0px));
+  }
+  /* 글자 항목은 한 줄(1lh)을 뺀 나머지를 위아래 여백으로 — 미설정이면 Quill 의 5px. (flex 로 가운데 맞추면 항목 자신의
+     줄 높이가 빠져 작은 글자 항목이 24px 아래로 내려간다 — 기본 게이트가 잡았다.) */
+  .ql-snow .ql-picker:not(.ql-color-picker):not(.ql-icon-picker) .ql-picker-item {
+    padding-block: max(5px, calc((var(--u-target-size, 0px) - 1lh) / 2));
+  }
+  .ql-snow .ql-icon-picker .ql-picker-item {
+    width: max(24px, var(--u-target-size, 0px));
+    height: max(24px, var(--u-target-size, 0px));
+    padding: max(2px, calc((var(--u-target-size, 0px) - 20px) / 2)) max(4px, calc((var(--u-target-size, 0px) - 16px) / 2));
+  }
+  .ql-snow .ql-tooltip a {
+    line-height: max(26px, var(--u-target-size, 0px));
   }
 
   .ql-toolbar .ql-stroke {

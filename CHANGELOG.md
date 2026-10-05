@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **The text editor's toolbar follows `--u-target-size`** (the host's minimum target size from
+  `@iyulab/components`). When it is set, toolbar buttons, pickers, picker options, colour swatches and the
+  link tooltip's actions are at least that size; icons and text keep their size. Unset, nothing changes.
+
 ## [0.5.2] - 2026-09-30
 
 ### Changed
