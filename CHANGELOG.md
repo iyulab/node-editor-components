@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2] - 2026-10-06
+
+### Fixed
+
+- **`u-text-editor`'s `change` is typed for TypeScript listeners** (`UTextEditorEventMap`): a listener
+  gets `CustomEvent<{ html, text, delta }>` instead of the native `Event`, so `e.detail.html` compiles.
+
 ## [0.6.1] - 2026-10-05
 
 ### Fixed

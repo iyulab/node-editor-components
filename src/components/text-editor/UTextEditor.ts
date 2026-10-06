@@ -18,6 +18,7 @@ import { styles } from './UTextEditor.styles.js';
  * @event change - Fired when the content of the editor changes. The event detail includes the current HTML, plain text, and Quill Delta representation of the content.
  */
 @customElement("u-text-editor")
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging -- typed event listeners (the DOM's own `HTMLMediaElementEventMap` pattern): the merged addEventListener/removeEventListener overloads are implemented by EventTarget
 export class UTextEditor extends UElement {
   static styles = [ super.styles, unsafeCSS(quillStyles), styles ];
 
@@ -105,7 +106,7 @@ export class UTextEditor extends UElement {
       this.value = html;
       // 🔴전파를 명시한다 — 이 이벤트는 섀도 경계를 넘어야 소비자에게 닿는다.
       //   `composed: false`(기본값)면 리스너가 «에러 없이» 한 번도 불리지 않는다.
-      this.dispatchEvent(new CustomEvent("change", {
+      this.dispatchEvent(new CustomEvent<UTextEditorEventMap["change"]["detail"]>("change", {
         detail: {
           html: html,
           text: quill.getText(),
@@ -238,6 +239,23 @@ export class UTextEditor extends UElement {
       this.quill.focus();
     }
   }
+}
+
+/** Events `<u-text-editor>` dispatches — bubbling and composed. `change` is a CustomEvent here, not the native one. */
+export interface UTextEditorEventMap {
+  /** The user edited the text (not programmatic `value` changes). `delta` is Quill's document model. */
+  'change': CustomEvent<{ html: string; text: string; delta: ReturnType<Quill['getContents']> }>;
+}
+
+/** Typed listeners for {@link UTextEditorEventMap} — element-scoped, the DOM's own pattern (`HTMLMediaElementEventMap`). */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging -- typed event listeners (the DOM's own `HTMLMediaElementEventMap` pattern): the merged addEventListener/removeEventListener overloads are implemented by EventTarget
+export interface UTextEditor {
+  addEventListener<K extends keyof UTextEditorEventMap>(type: K, listener: (this: UTextEditor, ev: UTextEditorEventMap[K]) => unknown, options?: boolean | AddEventListenerOptions): void;
+  addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: UTextEditor, ev: HTMLElementEventMap[K]) => unknown, options?: boolean | AddEventListenerOptions): void;
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+  removeEventListener<K extends keyof UTextEditorEventMap>(type: K, listener: (this: UTextEditor, ev: UTextEditorEventMap[K]) => unknown, options?: boolean | EventListenerOptions): void;
+  removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: UTextEditor, ev: HTMLElementEventMap[K]) => unknown, options?: boolean | EventListenerOptions): void;
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
 
 declare global {
