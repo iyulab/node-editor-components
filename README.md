@@ -131,7 +131,7 @@ Quill.js 기반 리치 텍스트(WYSIWYG) 에디터 컴포넌트입니다.
 | 성공 기준 | 보장 | 어디서 재는가 |
 |---|---|---|
 | SC 2.5.8 타깃 크기(최소) | `u-text-editor` 의 포인터 타깃이 24×24 CSS px 이상이거나 간격 예외(중심 간 24px)를 충족하고, 그 좌표에서 실제로 눌린다 — Quill 이 그리는 툴바(선택기가 열린 상태·색 견본·링크 툴팁 포함)도 잰다 | `tests/browser/target-size.browser.test.ts`(실제 크로미움) |
-| SC 2.1.2 키보드 함정 없음 | `u-text-editor` 안의 `Tab` 은 다음 컨트롤로 나간다(탭 문자를 넣지 않는다). `u-code-editor` 안의 `Tab` 은 들여쓰기이고, **`Ctrl+M`(macOS: `Ctrl+Shift+M`)** 이 Monaco 의 «Tab 으로 포커스 이동» 을 켜고 끈다 — 그 뒤의 `Tab` 은 편집기를 떠난다. 코드 편집기를 쓰는 화면은 이 방법을 사용자에게 알릴 것(SC 2.1.2 의 조건) | `tests/browser/keyboard-exit.browser.test.ts` |
+| SC 2.1.2 키보드 함정 없음 | `u-text-editor` 안의 `Tab` 은 다음 컨트롤로 나간다(탭 문자를 넣지 않는다). `u-code-editor` 안의 `Tab` 은 들여쓰기이고, **`Ctrl+M`(macOS: `Ctrl+Shift+M`)** 이 Monaco 의 «Tab 으로 포커스 이동» 을 켜고 끈다 — 그 뒤의 `Tab` 은 편집기를 떠난다. 편집 가능한 동안 편집 영역의 접근성 설명이 이 방법을 말한다(로캘 · 읽기 전용에서는 Tab 이 이미 나가므로 없음 · `no-tab-hint` 로 끔). 편집 영역의 이름은 `label` | `tests/browser/keyboard-exit.browser.test.ts` |
 | SC 2.1.1 키보드(포인터 커서 검사) | 포인터 커서를 보이면서 상호작용 요소가 아닌 것이 없다 — Quill 이 `href` 없는 앵커로 그리는 링크 툴팁의 편집·제거도 버튼 역할로 포커스를 받고 Enter/Space 로 눌린다 | `tests/browser/target-size.browser.test.ts` · `tests/browser/text-editor-link-tooltip-keyboard.browser.test.ts` |
 
 `u-code-editor` 는 스스로 렌더하는 조작부가 없어(액션은 소비자가 `header-actions` 슬롯으로 넣는다) 이 게이트의 대상이 아닙니다 — 슬롯에 넣는 버튼의 크기는 넣는 쪽이 정합니다.

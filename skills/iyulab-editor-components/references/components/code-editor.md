@@ -22,9 +22,10 @@ Monaco Editor wrapped as a custom element. Syntax highlighting, per-language con
 | Property | Type | Default | Reflect | Description |
 |----------|------|---------|---------|-------------|
 | `headless` | `boolean` | `false` | ✓ | Hides the header (label + `header-actions` slot) |
-| `label` | `string` | `'Editor'` | — | Header title text |
+| `label` | `string` | `'Editor'` | — | Header title text — also the editing area's accessible name |
 | `theme` | `'light' \| 'dark'` | `'light'` | — | Editor color theme. Synced automatically from `Theme.resolved()` on connect and on every `data-theme`/`theme` attribute mutation on `document.documentElement` — the declared default is overwritten before first render, and setting it directly is overwritten by the next sync |
-| `readOnly` | `boolean` | `false` | — | Prevents user input |
+| `readOnly` | `boolean` | `false` | — | Prevents user input (applies when changed after creation too) |
+| `noTabHint` | `boolean` | `false` | — | Attribute `no-tab-hint`. Drops the Tab hint from the editing area's description (see Keyboard) — for a page that states the method itself |
 | `language` | `string` | `'json'` | — | Monaco language id (`"javascript"`, `"typescript"`, …) |
 | `fontSize` | `number` | `14` | — | Editor font size in pixels |
 | `value` | `string` | `''` | — | Current text content |
@@ -69,7 +70,10 @@ other unchanged.
 `Tab` inside the editor indents — a code editor needs it — so `Tab` does not move the focus on its own.
 **`Ctrl+M`** (macOS: `Ctrl+Shift+M`) toggles Monaco's "Tab moves focus" mode; after it, `Tab` / `Shift+Tab`
 leave the editor. That is the keyboard way out (WCAG 2.1.2 allows a non-standard exit when the user is told
-the method), so a screen that hosts a code editor should say it near the editor — for example in its help text.
+the method), and the editor tells it: while editable, the editing area's accessible description says so (localized
+through `Locale` — English and Korean built in, others via `editorLocale.register`), so a screen reader announces it on
+entering. Read-only, `Tab` already leaves and there is no hint. A page may still show the method visibly — the hint
+is for assistive technology, not on screen.
 `Tab` from the control before the editor enters it.
 
 ## CSS Custom Properties

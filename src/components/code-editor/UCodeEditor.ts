@@ -9,6 +9,7 @@ import monacoStyles from "virtual:monaco-structure-css";
 import { Theme } from "@iyulab/components/dist/utilities/Theme.js";
 import { UElement } from "@iyulab/components/dist/components/UElement.js";
 import { styles } from './UCodeEditor.styles.js';
+import { editorLocale } from '../../locale.js';
 
 /**
  * code editor component used by monaco-editor
@@ -21,8 +22,14 @@ export class UCodeEditor extends UElement {
 
   /** Specifies whether the header should be displayed or not. @default false */
   @property({ type: Boolean, reflect: true }) headless: boolean = false;
-  /** The label text displayed in the header of the code editor. @default "Editor" */
+  /** The label text displayed in the header of the code editor — also the editing area's accessible name. @default "Editor" */
   @property({ type: String }) label: string = "Editor";
+  /**
+   * Do not attach the Tab hint. While editable, Tab indents and `Ctrl+M` (macOS `Ctrl+Shift+M`) switches it to moving
+   * the focus; the editing area carries that as its accessible description, so a screen reader user hears the way
+   * out when entering (WCAG 2.1.2). Set this when the page states the method itself. @default false
+   */
+  @property({ type: Boolean, attribute: "no-tab-hint" }) noTabHint: boolean = false;
   /** 편집기 테마. 문서 테마를 따라 자동으로 동기화된다(직접 지정해도 덮어쓰인다). */
   @property({ type: String }) theme: "light" | "dark" = "light"; 
   /** Whether the editor should be in read-only mode, preventing user input. @default false */
@@ -75,6 +82,7 @@ export class UCodeEditor extends UElement {
       lineNumbersMinChars: 2,
       lineDecorationsWidth: 1,
       readOnly: this.readOnly,
+      ariaLabel: this.label,
       value: this.value,
       // Updated options for newer Monaco
       scrollBeyondLastLine: false,
@@ -82,6 +90,8 @@ export class UCodeEditor extends UElement {
         alwaysConsumeMouseWheel: false
       }
     });
+
+    this.describeInput();
 
     this.editor.onDidChangeModelContent(() => {
       if (this.syncingValue) return;
@@ -111,6 +121,27 @@ export class UCodeEditor extends UElement {
     if (changedProperties.has("language") && this.editor) {
       monaco.editor.setModelLanguage(this.editor.getModel()!, this.language);
     }
+    if (changedProperties.has("label") && this.editor) {
+      this.editor.updateOptions({ ariaLabel: this.label });
+    }
+    if (changedProperties.has("readOnly") && this.editor) {
+      this.editor.updateOptions({ readOnly: this.readOnly });
+    }
+    if ((changedProperties.has("noTabHint") || changedProperties.has("readOnly")) && this.editor) {
+      this.describeInput();
+    }
+  }
+
+  /**
+   * The Tab hint as the editing area's description — only while editable: read-only, Monaco lets Tab leave the
+   * editor, so there is nothing to explain. The focusable node is Monaco's own (an EditContext `div` with
+   * `role="textbox"` where the browser supports it, a `textarea` elsewhere), so the description is set on it.
+   */
+  private describeInput() {
+    const input = this.container.value?.querySelector<HTMLElement>('[role="textbox"], textarea');
+    if (!input) return;
+    if (this.noTabHint || this.readOnly) input.removeAttribute("aria-describedby");
+    else input.setAttribute("aria-describedby", "tab-hint");
   }
   
   render() {
@@ -123,6 +154,7 @@ export class UCodeEditor extends UElement {
       <div class="editor">
         <main ${ref(this.container)}></main>
       </div>
+      <span id="tab-hint" hidden>${editorLocale.text("tabFocusHint")}</span>
     `;
   }
 }

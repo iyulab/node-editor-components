@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.7.0] - 2026-10-06
+
+### Added
+
+- **`u-code-editor` tells a screen reader the way out.** While editable, Tab indents and `Ctrl+M` (macOS
+  `Ctrl+Shift+M`) switches it to moving the focus; that method is now the editing area's accessible description,
+  announced on entering — WCAG 2.1.2 allows a non-standard exit when the user is told it, and 0.6.4 left the telling
+  to each page. Localized through `Locale` (`editorLocale`, English and Korean built in). Read-only has no hint (Tab
+  already leaves there). `no-tab-hint` drops it for a page that states the method itself.
+
+### Fixed
+
+- **The editing area is named by `label`.** It was always "Editor content", whatever the header said; a label change
+  now renames it too.
+- **Changing `readOnly` after the editor was created takes effect.** It was only read at creation.
+
+### Changed
+
+- Requires `@iyulab/components` `>=1.23.0` (`Locale.namespace`).
+
 ## [0.6.4] - 2026-10-06
 
 ### Documentation

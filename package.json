@@ -1,7 +1,7 @@
 {
   "name": "@iyulab/editor-components",
   "description": "various editor components by iyulab",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "keywords": [
     "iyulab",
     "web-components",
@@ -33,7 +33,9 @@
     "./dist/components/*/U*.js",
     "./src/components/*/U*.ts",
     "./dist/index.js",
-    "./src/index.ts"
+    "./src/index.ts",
+    "./dist/locale.js",
+    "./src/locale.ts"
   ],
   "exports": {
     ".": {
@@ -63,7 +65,7 @@
     "quill": "^2.0.3"
   },
   "peerDependencies": {
-    "@iyulab/components": ">=1.15.0",
+    "@iyulab/components": ">=1.23.0",
     "@lit/react": "^1.0.8",
     "react": "^18.0.0 || ^19.0.0",
     "monaco-editor": ">=0.56.0 <0.58.0"
