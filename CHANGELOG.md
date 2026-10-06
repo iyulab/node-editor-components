@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.3] - 2026-10-06
+
+### Documentation
+
+- README **Quick Start** — a first page with `u-text-editor` (its module only, so Monaco stays out of the bundle) that
+  reads the typed `change` detail. Checked against the published package in a clean Vite consumer: build, strict `tsc`
+  and a headless render.
+
 ## [0.6.2] - 2026-10-06
 
 ### Fixed

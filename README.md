@@ -21,6 +21,33 @@ React 래퍼는 `/react` 서브패스로 제공됩니다:
 import { UCodeEditor, UTextEditor } from '@iyulab/editor-components/react';
 ```
 
+## Quick Start
+
+첫 페이지 — 리치 텍스트 에디터 하나와 그 내용 읽기(Vite 기준, `index.html` 이 `src/main.ts` 를 모듈로 싣는다).
+`u-text-editor` 만 쓰면 그 모듈만 불러 Monaco 를 번들에 넣지 않는다.
+
+```bash
+npm install @iyulab/editor-components @iyulab/components
+```
+
+```ts
+// src/main.ts
+import '@iyulab/components/styles/tokens.css';
+import '@iyulab/editor-components/dist/components/text-editor/UTextEditor.js';
+
+const editor = document.createElement('u-text-editor');
+editor.label = 'Note';
+editor.value = '<p>Hello <strong>editor</strong>.</p>';
+editor.style.height = '320px'; // 호스트 상자가 높이를 정한다 — 아래 「크기」
+
+const preview = document.createElement('pre');
+editor.addEventListener('change', (e) => {
+  preview.textContent = e.detail.text; // e.detail: { html, text, delta } — 타입이 붙는다
+});
+
+document.body.append(editor, preview);
+```
+
 ## 포함된 컴포넌트
 
 ### `u-code-editor` (UCodeEditor)
