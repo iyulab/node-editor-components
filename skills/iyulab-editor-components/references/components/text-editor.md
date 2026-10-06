@@ -78,6 +78,11 @@ with 0.5.0 — see the CHANGELOG.
 |-------|--------|--------------|
 | `change` | `{ html: string, text: string, delta: QuillDelta }` | Fired only for user edits (Quill `source === 'user'`) — composed so it crosses the shadow boundary |
 
+## Keyboard
+
+`Tab` inside the editor moves on to the next control — it does not insert a tab character, so the
+keyboard is never trapped in the editor (WCAG 2.1.2).
+
 ## CSS Custom Properties
 
 `UTextEditor` doesn't declare any custom properties of its own — its styles read the shared

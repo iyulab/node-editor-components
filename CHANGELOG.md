@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.4] - 2026-10-06
+
+### Documentation
+
+- **Keyboard exit** (WCAG 2.1.2) is now stated and tested: in `u-text-editor` Tab moves on to the next control; in `u-code-editor` Tab indents and **`Ctrl+M`** (macOS: `Ctrl+Shift+M`) switches Tab to moving the focus — the method a screen hosting a code editor should tell its users. README accessibility table and the skill references (`code-editor.md` · `text-editor.md`).
+
 ## [0.6.3] - 2026-10-06
 
 ### Documentation

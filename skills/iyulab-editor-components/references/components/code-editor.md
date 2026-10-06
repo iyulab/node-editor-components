@@ -64,6 +64,14 @@ other unchanged.
 |-------|--------|--------------|
 | `change` | none (plain `Event`) | Fired on user edits (`Monaco.onDidChangeModelContent`). Not fired for programmatic `value` assignment while Monaco already holds that value. Read the new content from `value` |
 
+## Keyboard
+
+`Tab` inside the editor indents — a code editor needs it — so `Tab` does not move the focus on its own.
+**`Ctrl+M`** (macOS: `Ctrl+Shift+M`) toggles Monaco's "Tab moves focus" mode; after it, `Tab` / `Shift+Tab`
+leave the editor. That is the keyboard way out (WCAG 2.1.2 allows a non-standard exit when the user is told
+the method), so a screen that hosts a code editor should say it near the editor — for example in its help text.
+`Tab` from the control before the editor enters it.
+
 ## CSS Custom Properties
 
 None. Layout is plain flexbox — the header keeps its own height and the editing area takes the rest — so there is no layout variable to override (see [Sizing](#sizing) for how the element is sized), and colours come from Monaco's own theme (`vs-light`/`vs-dark`) rather than this library's `--u-*` design tokens.
