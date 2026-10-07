@@ -22,8 +22,16 @@ export class UCodeEditor extends UElement {
 
   /** Specifies whether the header should be displayed or not. @default false */
   @property({ type: Boolean, reflect: true }) headless: boolean = false;
-  /** The label text displayed in the header of the code editor — also the editing area's accessible name. @default "Editor" */
-  @property({ type: String }) label: string = "Editor";
+  /**
+   * The label text displayed in the header of the code editor — also the editing area's accessible name. Empty (the
+   * default) uses the locale string `codeEditor` ("Editor"). @default ""
+   */
+  @property({ type: String }) label: string = "";
+
+  /** The label as drawn — `label`, or the locale string. */
+  private get displayLabel(): string {
+    return this.label || editorLocale.text("codeEditor");
+  }
   /**
    * Do not attach the Tab hint. While editable, Tab indents and `Ctrl+M` (macOS `Ctrl+Shift+M`) switches it to moving
    * the focus; the editing area carries that as its accessible description, so a screen reader user hears the way
@@ -82,7 +90,7 @@ export class UCodeEditor extends UElement {
       lineNumbersMinChars: 2,
       lineDecorationsWidth: 1,
       readOnly: this.readOnly,
-      ariaLabel: this.label,
+      ariaLabel: this.displayLabel,
       value: this.value,
       // Updated options for newer Monaco
       scrollBeyondLastLine: false,
@@ -121,8 +129,9 @@ export class UCodeEditor extends UElement {
     if (changedProperties.has("language") && this.editor) {
       monaco.editor.setModelLanguage(this.editor.getModel()!, this.language);
     }
-    if (changedProperties.has("label") && this.editor) {
-      this.editor.updateOptions({ ariaLabel: this.label });
+    // 이름은 `label` 이나 로캘에서 온다 — 로캘 전환도 다시 그리므로 매 갱신에 맞춘다(같으면 건드리지 않는다).
+    if (this.editor && this.editor.getOption(monaco.editor.EditorOption.ariaLabel) !== this.displayLabel) {
+      this.editor.updateOptions({ ariaLabel: this.displayLabel });
     }
     if (changedProperties.has("readOnly") && this.editor) {
       this.editor.updateOptions({ readOnly: this.readOnly });
@@ -147,7 +156,7 @@ export class UCodeEditor extends UElement {
   render() {
     return html`
       <div class="header" ?hidden=${this.headless}>
-        <div class="title">${this.label}</div>
+        <div class="title">${this.displayLabel}</div>
         <div class="flex"></div>
         <slot name="header-actions"></slot>
       </div>

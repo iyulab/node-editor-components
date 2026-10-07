@@ -70,7 +70,7 @@ Monaco Editor 기반 코드 에디터 컴포넌트입니다.
 | Property | Type | Default | 설명 |
 |----------|------|---------|------|
 | `headless` | `boolean` | `false` | 헤더(라벨 영역) 숨김 |
-| `label` | `string` | `"Editor"` | 헤더 라벨 텍스트 |
+| `label` | `string` | `""` | 헤더 라벨 텍스트(편집 영역의 접근 가능한 이름). 비우면 로캘 문자열 `codeEditor`("Editor") |
 | `theme` | `"light" \| "dark"` | 시스템 테마 추적 | 에디터 테마 |
 | `readOnly` | `boolean` | `false` | 읽기 전용 모드 |
 | `language` | `string` | `"json"` | 구문 강조 언어 |
@@ -103,7 +103,7 @@ Quill.js 기반 리치 텍스트(WYSIWYG) 에디터 컴포넌트입니다.
 | Property | Type | Default | 설명 |
 |----------|------|---------|------|
 | `headless` | `boolean` | `false` | 헤더(라벨 영역) 숨김 |
-| `label` | `string` | `"Rich Text Editor"` | 헤더 라벨 텍스트 |
+| `label` | `string` | `""` | 헤더 라벨 텍스트. 비우면 로캘 문자열 `richTextEditor`("Rich Text Editor") |
 | `readOnly` | `boolean` | `false` | 읽기 전용 모드 |
 | `placeholder` | `string` | `"Start writing..."` | 플레이스홀더 텍스트 |
 | `value` | `string` | `""` | 에디터 HTML 내용 |

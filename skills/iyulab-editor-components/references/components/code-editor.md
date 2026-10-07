@@ -22,7 +22,7 @@ Monaco Editor wrapped as a custom element. Syntax highlighting, per-language con
 | Property | Type | Default | Reflect | Description |
 |----------|------|---------|---------|-------------|
 | `headless` | `boolean` | `false` | ✓ | Hides the header (label + `header-actions` slot) |
-| `label` | `string` | `'Editor'` | — | Header title text — also the editing area's accessible name |
+| `label` | `string` | `''` | — | Header title text — also the editing area's accessible name. Empty uses the locale string `codeEditor` ('Editor') |
 | `theme` | `'light' \| 'dark'` | `'light'` | — | Editor color theme. Synced automatically from `Theme.resolved()` on connect and on every `data-theme`/`theme` attribute mutation on `document.documentElement` — the declared default is overwritten before first render, and setting it directly is overwritten by the next sync |
 | `readOnly` | `boolean` | `false` | — | Prevents user input (applies when changed after creation too) |
 | `noTabHint` | `boolean` | `false` | — | Attribute `no-tab-hint`. Drops the Tab hint from the editing area's description (see Keyboard) — for a page that states the method itself |

@@ -44,6 +44,17 @@ describe('u-code-editor — accessible name and Tab hint', () => {
     expect(ax?.description).toMatch(/들여쓰기.*Ctrl\+M/);
   });
 
+  it('🔴without a label the name follows the locale — and a locale switch renames it', async () => {
+    Locale.set('ko');
+    const { el } = await enter();
+    expect((await axActive())?.name).toBe('편집기');
+    expect(el.shadowRoot!.querySelector('.title')?.textContent).toBe('편집기');
+    Locale.set('en');
+    await el.updateComplete;
+    await sleep(50);
+    expect((await axActive())?.name).toBe('Editor');
+  });
+
   it('a label change renames it', async () => {
     const { el } = await enter('label="Query"');
     el.label = 'Filter';

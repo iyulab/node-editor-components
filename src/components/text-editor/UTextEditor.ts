@@ -10,6 +10,7 @@ type QuillDeltaInput = Parameters<Quill["setContents"]>[0];
 import quillStyles from "quill/dist/quill.snow.css?inline";
 
 import { UElement } from "@iyulab/components/dist/components/UElement.js";
+import { editorLocale } from "../../locale.js";
 import { styles } from './UTextEditor.styles.js';
 
 /**
@@ -24,8 +25,8 @@ export class UTextEditor extends UElement {
 
   /** Specifies whether the header should be displayed or not. @default false */
   @property({ type: Boolean, reflect: true }) headless: boolean = false;
-  /** The label text displayed in the header of the rich text editor. @default "Rich Text Editor" */
-  @property({ type: String }) label: string = "Rich Text Editor";
+  /** The label text displayed in the header of the rich text editor. Empty (the default) uses the locale string `richTextEditor` ("Rich Text Editor"). @default "" */
+  @property({ type: String }) label: string = "";
   /** Whether the editor should be in read-only mode, preventing user input. @default false */
   @property({ type: Boolean }) readOnly: boolean = false;
   /** The placeholder text shown when the editor is empty. @default "Start writing..." */
@@ -170,7 +171,7 @@ export class UTextEditor extends UElement {
   render() {
     return html`
       <div class="header" ?hidden=${this.headless}>
-        <div class="title">${this.label}</div>
+        <div class="title">${this.label || editorLocale.text("richTextEditor")}</div>
         <div class="flex"></div>
         <slot name="header-actions"></slot>
       </div>

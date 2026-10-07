@@ -22,7 +22,7 @@ Rich text editor built on [Quill](https://quilljs.com/). Reads and writes HTML, 
 | Property | Type | Default | Reflect | Description |
 |----------|------|---------|---------|-------------|
 | `headless` | `boolean` | `false` | ✓ | Hides the header (label + `header-actions` slot) |
-| `label` | `string` | `'Rich Text Editor'` | — | Header title text |
+| `label` | `string` | `''` | — | Header title text. Empty uses the locale string `richTextEditor` ('Rich Text Editor') |
 | `readOnly` | `boolean` | `false` | — | Prevents user input |
 | `placeholder` | `string` | `'Start writing...'` | — | Placeholder shown when empty |
 | `value` | `string` | `''` | — | Current content as HTML |

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.1] - 2026-10-07
+
+### Fixed
+
+- **Editor labels follow the locale.** `u-code-editor` and `u-text-editor` defaulted `label` to "Editor" and
+  "Rich Text Editor", so the header — and the code editor's accessible name — stayed English in every language. They
+  now default to empty and draw the locale strings `codeEditor` / `richTextEditor` (Korean built in), and the code
+  editor's accessible name follows a runtime locale switch. A `label` you set still wins.
+
 ## [0.7.0] - 2026-10-06
 
 ### Added
