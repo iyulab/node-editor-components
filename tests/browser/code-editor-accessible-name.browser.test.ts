@@ -64,7 +64,7 @@ describe('u-code-editor — accessible name and Tab hint', () => {
   });
 
   it('NEGATIVE — read-only has no hint (Tab already leaves)', async () => {
-    const { ax } = await enter('', (el) => { el.readOnly = true; });
+    const { ax } = await enter('', (el) => { el.readonly = true; });
     expect(ax?.description ?? '').not.toMatch(/Ctrl\+M/);
   });
 
@@ -75,7 +75,7 @@ describe('u-code-editor — accessible name and Tab hint', () => {
 
   it('turning read-only on after creation takes effect — and the hint goes with it', async () => {
     const { el } = await enter('label="Query"');
-    el.readOnly = true;
+    el.readonly = true;
     await el.updateComplete;
     await sleep(50);
     expect((await axActive())?.description ?? '').not.toMatch(/Ctrl\+M/);

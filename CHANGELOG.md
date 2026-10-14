@@ -2,6 +2,27 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Both editors are form controls**, like the native `<textarea>` they stand in for. With a `name` the content is
+  submitted with the surrounding `<form>` (`u-text-editor`: its HTML, `""` while empty · `u-code-editor`: its text),
+  `form.reset()` returns to the `value` attribute, `disabled` or an ancestor `<fieldset disabled>` stops editing, and
+  `required` makes an empty editor invalid — a submit attempt shows the message under the editing area
+  (`::part(footer)`) and marks the editing area `aria-invalid`. Inside `u-form` they take part in `model`,
+  `validate()` and `reset()`. The text editor's editing area is now a named multi-line textbox for assistive
+  technology.
+
+### Changed
+
+- **Breaking:** `readOnly` is now `readonly` (attribute `readonly`, reflected) — the name every form control in the
+  family uses. Rename the property or attribute. A read-only editor stays selectable and scrollable.
+- **Breaking:** an empty `u-text-editor` has the `value` `""` (and `change` reports `html: ""`), not Quill's empty
+  paragraph `<p><br></p>`. Spaces are content.
+- The `@iyulab/components` peer floor is 1.50.0 (was 1.23.0) — the form control base gained fieldset-disabled
+  handling there.
+- `label` is unset by default instead of `""` (the header still shows the locale string). When it is unset, a wrapping
+  `u-field`'s label names the editing area.
+
 ### Fixed
 
 - Typing into an empty `u-text-editor` keeps the order of the characters — «hello» was entered as «elloh». The editor

@@ -22,13 +22,31 @@ Monaco Editor wrapped as a custom element. Syntax highlighting, per-language con
 | Property | Type | Default | Reflect | Description |
 |----------|------|---------|---------|-------------|
 | `headless` | `boolean` | `false` | ✓ | Hides the header (label + `header-actions` slot) |
-| `label` | `string` | `''` | — | Header title text — also the editing area's accessible name. Empty uses the locale string `codeEditor` ('Editor') |
+| `label` | `string` | `undefined` | — | Header title text — also the editing area's accessible name (a wrapping `u-field`'s label names it when this is unset). Unset uses the locale string `codeEditor` ('Editor') |
 | `theme` | `'light' \| 'dark'` | `'light'` | — | Editor color theme. Synced automatically from `Theme.resolved()` on connect and on every `data-theme`/`theme` attribute mutation on `document.documentElement` — the declared default is overwritten before first render, and setting it directly is overwritten by the next sync |
-| `readOnly` | `boolean` | `false` | — | Prevents user input (applies when changed after creation too) |
 | `noTabHint` | `boolean` | `false` | — | Attribute `no-tab-hint`. Drops the Tab hint from the editing area's description (see Keyboard) — for a page that states the method itself |
 | `language` | `string` | `'json'` | — | Monaco language id (`"javascript"`, `"typescript"`, …) |
 | `fontSize` | `number` | `14` | — | Editor font size in pixels |
 | `value` | `string` | `''` | — | Current text content |
+| `name` | `string` | `undefined` | — | Submit name — with it the content goes into the surrounding `<form>`'s data, and `u-form` reads it into its model |
+| `readonly` | `boolean` | `false` | ✓ | Prevents user input; the content stays selectable and scrollable (applies when changed after creation too) |
+| `disabled` | `boolean` | `false` | ✓ | Prevents editing; an ancestor `<fieldset disabled>` does the same |
+| `required` | `boolean` | `false` | ✓ | An empty editor is invalid (`valueMissing`); a submit attempt shows the message under the editor |
+
+## Form control
+
+Like the native `<textarea>` it stands in for, the editor is a form-associated control (the `@iyulab/components` form
+control base): with a `name` it submits its text with its `<form>`, `form.reset()` returns it to its `value` attribute,
+`disabled` or an ancestor `<fieldset disabled>` stops editing, and `required` makes it invalid while empty — a submit
+attempt (or `validate()`) shows the message under the editing area (`::part(footer)`) and marks the editing area
+`aria-invalid`. Inside `u-form` it takes part in `model`, `validate()` and `reset()` like any other control.
+
+```html
+<form>
+  <u-text-editor name="body" required></u-text-editor>
+  <u-code-editor name="query" language="sql" value="select 1"></u-code-editor>
+</form>
+```
 
 ## Sizing
 

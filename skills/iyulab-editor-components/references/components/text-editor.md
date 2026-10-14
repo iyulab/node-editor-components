@@ -22,12 +22,30 @@ Rich text editor built on [Quill](https://quilljs.com/). Reads and writes HTML, 
 | Property | Type | Default | Reflect | Description |
 |----------|------|---------|---------|-------------|
 | `headless` | `boolean` | `false` | ✓ | Hides the header (label + `header-actions` slot) |
-| `label` | `string` | `''` | — | Header title text. Empty uses the locale string `richTextEditor` ('Rich Text Editor') |
-| `readOnly` | `boolean` | `false` | — | Prevents user input |
+| `label` | `string` | `undefined` | — | Header title text — also the editing area's accessible name (a wrapping `u-field`'s label names it when this is unset). Unset uses the locale string `richTextEditor` ('Rich Text Editor') |
 | `placeholder` | `string` | `'Start writing...'` | — | Placeholder shown when empty |
-| `value` | `string` | `''` | — | Current content as HTML |
+| `value` | `string` | `''` | — | Current content as HTML — `''` while the editor is empty (Quill itself shows an empty paragraph then) |
+| `name` | `string` | `undefined` | — | Submit name — with it the content goes into the surrounding `<form>`'s data, and `u-form` reads it into its model |
+| `readonly` | `boolean` | `false` | ✓ | Prevents user input; the content stays selectable and scrollable (applies when changed after creation too) |
+| `disabled` | `boolean` | `false` | ✓ | Prevents editing; an ancestor `<fieldset disabled>` does the same |
+| `required` | `boolean` | `false` | ✓ | An empty editor is invalid (`valueMissing`); a submit attempt shows the message under the editor |
 | `height` | `number` | `300` | — | Editing-area height in pixels **when the host has no height constraint** — see [Sizing](#sizing) |
 | `toolbar` | `string[][]` | `undefined` | — | Custom toolbar configuration. When left unset, falls back at runtime to Quill's default 14-group toolbar (not a declared property default) |
+
+## Form control
+
+Like the native `<textarea>` it stands in for, the editor is a form-associated control (the `@iyulab/components` form
+control base): with a `name` it submits its HTML (an empty editor submits `""`) with its `<form>`, `form.reset()` returns it to its `value` attribute,
+`disabled` or an ancestor `<fieldset disabled>` stops editing, and `required` makes it invalid while empty — a submit
+attempt (or `validate()`) shows the message under the editing area (`::part(footer)`) and marks the editing area
+`aria-invalid`. Inside `u-form` it takes part in `model`, `validate()` and `reset()` like any other control.
+
+```html
+<form>
+  <u-text-editor name="body" required></u-text-editor>
+  <u-code-editor name="query" language="sql" value="select 1"></u-code-editor>
+</form>
+```
 
 ## Sizing
 
@@ -80,8 +98,9 @@ with 0.5.0 — see the CHANGELOG.
 
 ## Keyboard
 
-`Tab` inside the editor moves on to the next control — it does not insert a tab character, so the
-keyboard is never trapped in the editor (WCAG 2.1.2).
+`Tab` inside the editor moves on to the next control — it does not insert a tab character, also inside a list, a
+quote or a code block (where Quill would indent), so the keyboard is never trapped in the editor (WCAG 2.1.2). Indent
+with the toolbar buttons.
 
 ## CSS Custom Properties
 

@@ -70,12 +70,15 @@ Monaco Editor 기반 코드 에디터 컴포넌트입니다.
 | Property | Type | Default | 설명 |
 |----------|------|---------|------|
 | `headless` | `boolean` | `false` | 헤더(라벨 영역) 숨김 |
-| `label` | `string` | `""` | 헤더 라벨 텍스트(편집 영역의 접근 가능한 이름). 비우면 로캘 문자열 `codeEditor`("Editor") |
+| `label` | `string` | — | 헤더 라벨 텍스트(편집 영역의 접근 가능한 이름). 비우면 로캘 문자열 `codeEditor`("Editor") |
 | `theme` | `"light" \| "dark"` | 시스템 테마 추적 | 에디터 테마 |
-| `readOnly` | `boolean` | `false` | 읽기 전용 모드 |
 | `language` | `string` | `"json"` | 구문 강조 언어 |
 | `fontSize` | `number` | `14` | 폰트 크기(px) |
 | `value` | `string` | `""` | 에디터 내용 |
+| `name` | `string` | — | 제출 이름 — 주면 내용이 `<form>` 데이터에 실리고 `u-form` 모델에 들어간다 |
+| `readonly` | `boolean` | `false` | 읽기 전용(내용은 고르고 스크롤할 수 있다) |
+| `disabled` | `boolean` | `false` | 편집 불가 — 조상 `<fieldset disabled>` 도 같다 |
+| `required` | `boolean` | `false` | 비어 있으면 무효(`valueMissing`) — 제출 시도 때 편집기 아래에 문구 |
 
 **크기:** **호스트 상자가 크기를 정합니다** — `:host` 가 `width: 100%; height: 100%` 이고 편집 영역은 머리글을 뺀 나머지입니다(Monaco 가 `automaticLayout` 으로 따라옵니다). `height` 프로퍼티는 없으니 요소나 부모에 CSS 로 높이를 주세요.
 
@@ -103,10 +106,13 @@ Quill.js 기반 리치 텍스트(WYSIWYG) 에디터 컴포넌트입니다.
 | Property | Type | Default | 설명 |
 |----------|------|---------|------|
 | `headless` | `boolean` | `false` | 헤더(라벨 영역) 숨김 |
-| `label` | `string` | `""` | 헤더 라벨 텍스트. 비우면 로캘 문자열 `richTextEditor`("Rich Text Editor") |
-| `readOnly` | `boolean` | `false` | 읽기 전용 모드 |
+| `label` | `string` | — | 헤더 라벨 텍스트(편집 영역의 접근 가능한 이름). 비우면 로캘 문자열 `richTextEditor`("Rich Text Editor") |
 | `placeholder` | `string` | `"Start writing..."` | 플레이스홀더 텍스트 |
-| `value` | `string` | `""` | 에디터 HTML 내용 |
+| `value` | `string` | `""` | 에디터 HTML 내용 — 비었으면 `""` |
+| `name` | `string` | — | 제출 이름 — 주면 내용이 `<form>` 데이터에 실리고 `u-form` 모델에 들어간다 |
+| `readonly` | `boolean` | `false` | 읽기 전용(내용은 고르고 스크롤할 수 있다) |
+| `disabled` | `boolean` | `false` | 편집 불가 — 조상 `<fieldset disabled>` 도 같다 |
+| `required` | `boolean` | `false` | 비어 있으면 무효(`valueMissing`) — 제출 시도 때 편집기 아래에 문구 |
 | `height` | `number` | `300` | 호스트에 높이 제약이 **없을 때의** 편집 영역 높이(px) — 아래 「크기」 참조 |
 | `toolbar` | `string[][]` | 기본 툴바 | 커스텀 툴바 설정 |
 

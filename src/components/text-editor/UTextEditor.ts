@@ -9,30 +9,46 @@ type QuillDelta = ReturnType<Quill["getContents"]>;
 type QuillDeltaInput = Parameters<Quill["setContents"]>[0];
 import quillStyles from "quill/dist/quill.snow.css?inline";
 
-import { UElement } from "@iyulab/components/dist/components/UElement.js";
+import { UFormControlElement } from "@iyulab/components/dist/components/UFormControlElement.js";
+import { Locale } from "@iyulab/components/dist/utilities/Locale.js";
 import { editorLocale } from "../../locale.js";
 import { styles } from './UTextEditor.styles.js';
 
 /**
  * A rich text editor component built using Quill.js, providing a customizable and user-friendly interface for text editing. It supports various formatting options, themes, and can be configured to be read-only or editable.
- * 
+ *
+ * A form control: with a `name` it submits its HTML with the surrounding `<form>` (an empty editor submits `""`), takes
+ * part in `u-form`'s model, resets to its `value` attribute, follows `disabled` and an ancestor `<fieldset disabled>`,
+ * and with `required` is invalid while empty.
+ *
  * @event change - Fired when the content of the editor changes. The event detail includes the current HTML, plain text, and Quill Delta representation of the content.
+ * @csspart footer - The validation message under the editing area, shown while `invalid`.
  */
 @customElement("u-text-editor")
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging -- typed event listeners (the DOM's own `HTMLMediaElementEventMap` pattern): the merged addEventListener/removeEventListener overloads are implemented by EventTarget
-export class UTextEditor extends UElement {
+export class UTextEditor extends UFormControlElement<string> {
   static styles = [ super.styles, unsafeCSS(quillStyles), styles ];
 
   /** Specifies whether the header should be displayed or not. @default false */
   @property({ type: Boolean, reflect: true }) headless: boolean = false;
-  /** The label text displayed in the header of the rich text editor. Empty (the default) uses the locale string `richTextEditor` ("Rich Text Editor"). @default "" */
-  @property({ type: String }) label: string = "";
-  /** Whether the editor should be in read-only mode, preventing user input. @default false */
-  @property({ type: Boolean }) readOnly: boolean = false;
   /** The placeholder text shown when the editor is empty. @default "Start writing..." */
-  @property({ type: String }) placeholder: string = "Start writing...";  
-  /** The current HTML content of the rich text editor. @default "" */
-  @property({ type: String }) value: string = "";
+  @property({ type: String }) placeholder: string = "Start writing...";
+  /**
+   * The current HTML content of the rich text editor — `""` while the editor is empty (Quill itself shows an empty
+   * paragraph then). The label (`label`, shown in the header and naming the editing area) and `readonly` come from the
+   * form control base. @default ""
+   */
+  @property({ type: String }) override value: string = "";
+
+  /** The label as drawn in the header — `label`, or the locale string. */
+  private get displayLabel(): string {
+    return this.label || editorLocale.text("richTextEditor");
+  }
+
+  /** The editing area's name — `label`, else the host's `aria-label` (a wrapping `u-field` sets it), else the header. */
+  private get accessibleName(): string {
+    return this.resolvedAriaLabel || this.displayLabel;
+  }
   /**
    * 편집 영역의 **기본** 높이(px) — 호스트에 높이 제약이 없을 때의 값. 그때 호스트 상자는 여기에
    * 머리글이 더해진 크기다(`headless` 면 머리글 없음).
@@ -82,7 +98,7 @@ export class UTextEditor extends UElement {
 
     this.quill = new Quill(this.container.value!, {
       theme: 'snow',
-      readOnly: this.readOnly,
+      readOnly: !this.editable,
       placeholder: this.placeholder,
       modules: {
         toolbar: this.toolbar || defaultToolbar,
@@ -107,6 +123,8 @@ export class UTextEditor extends UElement {
     if (this.value) {
       this.setQuillContents(this.value);
     }
+    this.describeEditingArea();
+    this.syncFormValue();
 
     // Listen for content changes — 사용자 편집(source='user')만 change로 노출한다.
     // 지역 참조를 캡처해, disconnect 후 this.quill 이 null 이 되어도 핸들러가
@@ -115,12 +133,14 @@ export class UTextEditor extends UElement {
     quill.on('text-change', (_delta, _oldDelta, source) => {
       if (source !== 'user') return;
       const html = quill.root.innerHTML;
-      this.value = html;
+      // 빈 편집기의 값은 `""` 다 — Quill 은 그때도 빈 단락(`<p><br></p>`)을 그린다. 제출값 · `required` 가 같은 정의를 쓴다.
+      this.value = isBlank(quill) ? "" : html;
+      if (this.invalid && !this.novalidate) this.validate();
       // 🔴전파를 명시한다 — 이 이벤트는 섀도 경계를 넘어야 소비자에게 닿는다.
       //   `composed: false`(기본값)면 리스너가 «에러 없이» 한 번도 불리지 않는다.
       this.dispatchEvent(new CustomEvent<UTextEditorEventMap["change"]["detail"]>("change", {
         detail: {
-          html: html,
+          html: this.value,
           text: quill.getText(),
           delta: quill.getContents()
         },
@@ -182,19 +202,68 @@ export class UTextEditor extends UElement {
     super.updated(changedProperties);
     await this.updateComplete;
 
+    if (changedProperties.has("value")) this.syncFormValue();
     if (this.quill) {
-      if (changedProperties.has("value") && this.value !== this.quill.root.innerHTML) {
+      if (changedProperties.has("value") && this.value !== this.shownHTML()) {
         this.setQuillContents(this.value);
       }
-      
-      if (changedProperties.has("readOnly")) {
-        this.quill.enable(!this.readOnly);
+      // 편집 가능 = 읽기 전용도 비활성도 아님 — 조상 `<fieldset disabled>` 는 기반의 `formDisabled` 로 온다.
+      if (changedProperties.has("readonly") || changedProperties.has("disabled") || changedProperties.has("formDisabled")) {
+        this.quill.enable(this.editable);
       }
-      
       if (changedProperties.has("placeholder")) {
         this.quill.root.dataset.placeholder = this.placeholder;
       }
+      this.describeEditingArea();
     }
+  }
+
+  /** 사용자가 고칠 수 있는가 — `readonly` 도 비활성(자기 `disabled` · 조상 fieldset)도 아닐 때. */
+  private get editable(): boolean {
+    return !this.readonly && !this.effectivelyDisabled;
+  }
+
+  /** Quill 이 지금 보이는 내용을 `value` 와 같은 정의로 — 비었으면 `""`. */
+  private shownHTML(): string {
+    return !this.quill || isBlank(this.quill) ? "" : this.quill.root.innerHTML;
+  }
+
+  /** 제출값은 `value` 그대로(빈 편집기는 `""`). */
+  private syncFormValue() {
+    this.internals?.setFormValue(this.value);
+  }
+
+  /**
+   * 편집 영역(Quill 의 `contenteditable`)이 스스로를 말하게 한다 — 이름 · 여러 줄 입력 · 필수 · 무효 · 오류 문구. Quill 의 마크업이라
+   * 우리 템플릿 밖이고, 오류 문구는 같은 섀도 루트의 `footer` 라 `aria-describedby` 로 닿는다.
+   */
+  private describeEditingArea() {
+    const area = this.quill?.root;
+    if (!area) return;
+    const set = (name: string, value: string | null) => {
+      if (value === null) area.removeAttribute(name);
+      else if (area.getAttribute(name) !== value) area.setAttribute(name, value);
+    };
+    set("role", "textbox");
+    set("aria-multiline", "true");
+    set("aria-label", this.accessibleName);
+    set("aria-required", this.required ? "true" : null);
+    set("aria-invalid", this.invalid ? "true" : null);
+    set("aria-describedby", this.invalid && this.validationMessage ? "footer" : null);
+  }
+
+  protected setValidity(): void {
+    if (this.required && !this.value) {
+      this.commit({ valueMissing: true }, Locale.getValue("valueMissing"), this.quill?.root);
+    } else {
+      this.commit({}, "");
+    }
+  }
+
+  /** 이 편집기를 비우고 검증 상태를 지운다. 폼 초기화는 그 뒤 `value` 속성(기본값)을 다시 얹는다. */
+  public reset(): void {
+    this.value = "";
+    this.invalid = false;
   }
 
   /** HTML을 Quill Delta로 변환해 silent source로 주입한다 — 프로그램적 콘텐츠 세팅이
@@ -206,15 +275,17 @@ export class UTextEditor extends UElement {
   }
 
   render() {
+    const message = this.invalid ? this.validationMessage : "";
     return html`
       <div class="header" ?hidden=${this.headless}>
-        <div class="title">${this.label || editorLocale.text("richTextEditor")}</div>
+        <div class="title">${this.displayLabel}</div>
         <div class="flex"></div>
         <slot name="header-actions"></slot>
       </div>
       <div class="editor" style="height: ${this.height}px;">
         <div class="quill-container" ${ref(this.container)}></div>
       </div>
+      <div id="footer" class="footer" part="footer" ?hidden=${!message}>${message}</div>
     `;
   }
 
@@ -254,7 +325,7 @@ export class UTextEditor extends UElement {
   setDelta(delta: QuillDeltaInput): void {
     if (this.quill) {
       this.quill.setContents(delta, Quill.sources.SILENT);
-      this.value = this.quill.root.innerHTML;
+      this.value = this.shownHTML();
     }
   }
 
@@ -265,18 +336,23 @@ export class UTextEditor extends UElement {
   clear(): void {
     if (this.quill) {
       this.quill.setText('', Quill.sources.SILENT);
-      this.value = this.quill.root.innerHTML;
+      this.value = "";
     }
   }
 
   /**
    * Focus the editor
    */
-  focus(): void {
+  override focus(): void {
     if (this.quill) {
       this.quill.focus();
     }
   }
+}
+
+/** 빈 편집기 — 문서가 끝의 줄바꿈 하나뿐(그림 같은 삽입물은 길이 1 을 차지한다). 공백만 친 것은 내용이다. */
+function isBlank(quill: Quill): boolean {
+  return quill.getLength() <= 1;
 }
 
 /** The live selection's range inside `root`, as a `Range` (Quill reads `startContainer` · `collapsed` from it). */

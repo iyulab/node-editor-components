@@ -52,4 +52,21 @@ export const styles = css`
       height: 100%;
     }
   }
+  /* 폼 컨트롤 기반은 읽기 전용 컨트롤의 포인터를 막는다 — 편집기는 읽기 전용에서도 스크롤하고 글을 골라 복사한다. */
+  :host([readonly]) {
+    pointer-events: auto;
+  }
+
+  /* 검증 문구 — 형제 폼 컨트롤(u-field)의 바닥 줄과 같은 색 · 크기. */
+  .footer {
+    flex: none;
+    padding: 6px 20px;
+    font-size: 0.75em;
+    line-height: 1.2;
+    color: var(--u-danger-color-strong, #C62828);
+    border-top: 1px solid var(--u-border-color-weak, #EEEEEE);
+  }
+  .footer[hidden] {
+    display: none;
+  }
 `;
