@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Typing into an empty `u-text-editor` keeps the order of the characters — «hello» was entered as «elloh». The editor
+  lives in a shadow root, where Quill read the focus and the selection from the document and found neither; when the
+  first character replaced the empty paragraph it could not put the caret back. The editor now reads both through its
+  shadow root (`getComposedRanges`). A toolbar format chosen while typing (Bold, then type) applies where the caret is.
+- Tab leaves the editor everywhere, as documented — also inside a list, a quote or a code block, where Quill used Tab to
+  indent. Indent with the toolbar buttons.
+
 ## [0.7.2] - 2026-10-09
 
 ### Changed

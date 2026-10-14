@@ -33,6 +33,19 @@ describe('u-text-editor — keyboard exit', () => {
     await sleep(50);
     expect(active()?.id).toBe('after');
   });
+
+  it('Tab leaves from a list item too — Quill binds Tab to indent there', async () => {
+    around('<u-text-editor value="<ul><li>item</li></ul>"></u-text-editor>');
+    const el = document.querySelector('u-text-editor') as HTMLElement & { updateComplete: Promise<unknown>; value: string };
+    await el.updateComplete;
+    await sleep(300);
+    await userEvent.click(el.shadowRoot!.querySelector<HTMLElement>('.ql-editor li')!);
+    await userEvent.keyboard('{Home}');
+    await userEvent.keyboard('{Tab}');
+    await sleep(50);
+    expect(active()?.id).toBe('after');
+    expect(el.value).not.toContain('ql-indent');
+  });
 });
 
 describe('u-code-editor — keyboard exit', () => {

@@ -85,10 +85,21 @@ export class UTextEditor extends UElement {
       readOnly: this.readOnly,
       placeholder: this.placeholder,
       modules: {
-        toolbar: this.toolbar || defaultToolbar
+        toolbar: this.toolbar || defaultToolbar,
+        // Tab 은 편집기를 떠난다(SC 2.1.2 — README · 스킬 문서의 계약). Quill 의 Tab 바인딩 여섯(탭 문자 · 들여쓰기 · 코드 블록
+        // 들여쓰기)은 그 키를 가져간다 — 처리기가 true 를 돌려주면 Quill 은 기본 동작을 막지 않는다. 들여쓰기는 도구 막대의 버튼으로.
+        keyboard: {
+          bindings: Object.fromEntries(
+            ['tab', 'remove tab', 'indent', 'outdent', 'indent code-block', 'outdent code-block'].map((name) => [
+              name,
+              { key: 'Tab', shiftKey: null, handler: () => true },
+            ]),
+          ),
+        },
       }
     });
 
+    this.readSelectionThroughShadowRoot(this.quill);
     this.enhanceLinkTooltipKeyboard(this.quill);
 
     // Set initial content — innerHTML 직접 변이는 Quill MutationObserver가 source='user'로
@@ -117,6 +128,32 @@ export class UTextEditor extends UElement {
         composed: true
       }));
     });
+  }
+
+  /**
+   * Quill 은 선택을 `document.getSelection()` · `document.activeElement` 로 읽는다 — 섀도 루트 안의 편집 영역에서는 둘 다
+   * 호스트로 재지정돼 «포커스 없음 · 선택 없음» 이 된다. 그래서 빈 편집기에 첫 글자가 들어와 빈 단락의 `<br>` 가 글자로 바뀔 때
+   * Quill 이 커서를 되돌려 놓지 못해 커서가 맨 앞에 남았고, 이어 친 글자가 전부 앞에 붙었다(«hello» → «elloh»).
+   * 이 인스턴스의 두 읽기를 섀도 루트 기준으로 바꾼다: 포커스는 루트의 `activeElement`, 선택은 표준 `getComposedRanges`
+   * (지원하지 않는 엔진은 Chromium 의 `ShadowRoot.getSelection`)로 루트 안의 범위를 얻는다. 쓰기(`setNativeRange`)는 문서 선택에
+   * 범위를 더하는 것이라 그대로 닿는다.
+   */
+  private readSelectionThroughShadowRoot(quill: Quill) {
+    const root = quill.root.getRootNode();
+    if (!(root instanceof ShadowRoot)) return;
+    const selection = quill.selection as unknown as {
+      hasFocus(): boolean;
+      getNativeRange(): unknown;
+      normalizeNative(range: Range): unknown;
+    };
+    selection.hasFocus = () => {
+      const active = root.activeElement;
+      return active === quill.root || (active != null && quill.root.contains(active));
+    };
+    selection.getNativeRange = () => {
+      const range = rangeInShadowRoot(root);
+      return range ? selection.normalizeNative(range) : null;
+    };
   }
 
   /**
@@ -240,6 +277,23 @@ export class UTextEditor extends UElement {
       this.quill.focus();
     }
   }
+}
+
+/** The live selection's range inside `root`, as a `Range` (Quill reads `startContainer` · `collapsed` from it). */
+function rangeInShadowRoot(root: ShadowRoot): Range | null {
+  const selection = document.getSelection();
+  if (selection && 'getComposedRanges' in selection) {
+    const [composed] = (selection as Selection & {
+      getComposedRanges(options: { shadowRoots: ShadowRoot[] }): StaticRange[];
+    }).getComposedRanges({ shadowRoots: [root] });
+    if (!composed || !root.contains(composed.startContainer)) return null;
+    const range = document.createRange();
+    range.setStart(composed.startContainer, composed.startOffset);
+    range.setEnd(composed.endContainer, composed.endOffset);
+    return range;
+  }
+  const own = (root as ShadowRoot & { getSelection?(): Selection | null }).getSelection?.();
+  return own && own.rangeCount > 0 ? own.getRangeAt(0) : null;
 }
 
 /** Events `<u-text-editor>` dispatches — bubbling and composed. `change` is a CustomEvent here, not the native one. */
