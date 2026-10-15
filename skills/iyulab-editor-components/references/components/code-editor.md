@@ -94,6 +94,12 @@ entering. Read-only, `Tab` already leaves and there is no hint. A page may still
 is for assistive technology, not on screen.
 `Tab` from the control before the editor enters it.
 
+## CSS Parts
+
+| Part | Description |
+|------|-------------|
+| `footer` | The validation message under the editing area — present only while `invalid` |
+
 ## CSS Custom Properties
 
 None. Layout is plain flexbox — the header keeps its own height and the editing area takes the rest — so there is no layout variable to override (see [Sizing](#sizing) for how the element is sized), and colours come from Monaco's own theme (`vs-light`/`vs-dark`) rather than this library's `--u-*` design tokens.

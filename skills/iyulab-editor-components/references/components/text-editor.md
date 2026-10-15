@@ -102,6 +102,12 @@ with 0.5.0 — see the CHANGELOG.
 quote or a code block (where Quill would indent), so the keyboard is never trapped in the editor (WCAG 2.1.2). Indent
 with the toolbar buttons.
 
+## CSS Parts
+
+| Part | Description |
+|------|-------------|
+| `footer` | The validation message under the editing area — present only while `invalid` |
+
 ## CSS Custom Properties
 
 `UTextEditor` doesn't declare any custom properties of its own — its styles read the shared
