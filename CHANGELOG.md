@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Documentation
+
+- `u-text-editor`: the README and the skill reference say how to treat the HTML value when rendering it outside the
+  editor — HTML read back from storage may not come from this editor, so sanitize it where you render it.
+
 ## [0.8.0] - 2026-10-15
 
 ### Added

@@ -47,6 +47,13 @@ attempt (or `validate()`) shows the message under the editing area (`::part(foot
 </form>
 ```
 
+## Rendering the HTML elsewhere
+
+`value` and `getHTML()` are HTML. The editor normalizes what it loads to its own formats, but HTML read back from
+storage is whatever reached your server — anyone can send HTML to your API directly, without this editor. When you
+render that HTML outside the editor (a read-only view, an email, another page) with `innerHTML`, sanitize it on the
+server or where you render it, with an HTML sanitizer that keeps an allow-list of tags and attributes.
+
 ## Sizing
 
 **The host box owns the height** (since 0.5.0 — the same contract as `u-code-editor`). Give the
