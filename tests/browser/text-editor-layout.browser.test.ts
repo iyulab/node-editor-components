@@ -115,7 +115,8 @@ describe('u-text-editor 배치', () => {
     const header = rect(root.querySelector('.header')!);
     const editor = rect(root.querySelector('.editor')!);
     expect(Math.round(rect(el).height), '호스트 상자는 CSS 를 따른다').toBe(150);
-    expect(Math.round(header.height + editor.height), '머리글 + 편집 영역 = 호스트 안쪽 높이').toBe(el.clientHeight);
+    // 상자(테두리)는 섀도 안 .base 가 그린다 — 안쪽 높이는 그 상자의 것이다.
+    expect(Math.round(header.height + editor.height), '머리글 + 편집 영역 = 상자 안쪽 높이').toBe((root.querySelector('.base') as HTMLElement).clientHeight);
     expect(editor.height, '편집 영역이 height 프로퍼티(300)를 버리고 줄었다').toBeLessThan(150);
     expect(Math.round(editor.bottom), '넘치지 않는다').toBeLessThanOrEqual(Math.round(rect(el).bottom));
   });
@@ -135,12 +136,12 @@ describe('u-text-editor 배치', () => {
     const header = rect(root.querySelector('.header')!);
     const editor = rect(root.querySelector('.editor')!);
     expect(Math.round(editor.height)).toBe(300);
-    expect(el.clientHeight).toBe(Math.round(header.height + 300));
+    expect((root.querySelector('.base') as HTMLElement).clientHeight).toBe(Math.round(header.height + 300));
   });
 
   it('headless 면 편집 영역이 호스트 안쪽 전체다', async () => {
     const el = await mount('style="width:480px;height:200px" headless');
     const editor = rect(el.shadowRoot!.querySelector('.editor')!);
-    expect(Math.round(editor.height)).toBe(el.clientHeight);
+    expect(Math.round(editor.height)).toBe((el.shadowRoot!.querySelector('.base') as HTMLElement).clientHeight);
   });
 });

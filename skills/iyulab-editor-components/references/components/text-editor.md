@@ -113,6 +113,7 @@ with the toolbar buttons.
 
 | Part | Description |
 |------|-------------|
+| `base` | The editor box (border, rounded corners, background) — style the box here, not on the host |
 | `footer` | The validation message under the editing area — present only while `invalid` |
 
 ## CSS Custom Properties

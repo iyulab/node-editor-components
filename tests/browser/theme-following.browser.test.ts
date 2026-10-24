@@ -59,20 +59,20 @@ describe('텍스트 편집기 — 테마·브랜드 추종', () => {
   it('[회귀] 라이트 테마에서 밝은 배경으로 렌더된다', async () => {
     Theme.set('light');
     await mount();
-    expect(luminance(getComputedStyle(el).backgroundColor)).toBeGreaterThan(180);
+    expect(luminance(getComputedStyle(el.shadowRoot!.querySelector('.base')!).backgroundColor)).toBeGreaterThan(180);
   });
 
   it('[회귀] 다크 테마에서 어두운 배경으로 렌더된다', async () => {
     Theme.set('dark');
     await mount();
-    expect(luminance(getComputedStyle(el).backgroundColor)).toBeLessThan(120);
+    expect(luminance(getComputedStyle(el.shadowRoot!.querySelector('.base')!).backgroundColor)).toBeLessThan(120);
   });
 
   it("[회귀] 'system' 선호에서도 실효 테마를 따른다", async () => {
     document.documentElement.setAttribute('data-theme', 'system');
     document.documentElement.setAttribute('theme', 'dark');
     await mount();
-    expect(luminance(getComputedStyle(el).backgroundColor)).toBeLessThan(120);
+    expect(luminance(getComputedStyle(el.shadowRoot!.querySelector('.base')!).backgroundColor)).toBeLessThan(120);
   });
 
   // ⒝ 변경의 증거 — 채택된 시트를 실제로 읽는다(소스 파일이 아니라)

@@ -22,6 +22,7 @@ import { styles } from './UTextEditor.styles.js';
  * and with `required` is invalid while empty.
  *
  * @event change - Fired when the content of the editor changes. The event detail includes the current HTML, plain text, and Quill Delta representation of the content.
+ * @csspart base - The editor box (border, rounded corners, background) — style it here, not on the host.
  * @csspart footer - The validation message under the editing area, shown while `invalid`.
  */
 @customElement("u-text-editor")
@@ -276,7 +277,7 @@ export class UTextEditor extends UFormControlElement<string> {
 
   render() {
     const message = this.invalid ? this.validationMessage : "";
-    return html`
+    return html`<div class="base" part="base">
       <div class="header" ?hidden=${this.headless}>
         <div class="title">${this.displayLabel}</div>
         <div class="flex"></div>
@@ -286,7 +287,7 @@ export class UTextEditor extends UFormControlElement<string> {
         <div class="quill-container" ${ref(this.container)}></div>
       </div>
       <div id="footer" class="footer" part="footer" ?hidden=${!message}>${message}</div>
-    `;
+    </div>`;
   }
 
   /**

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **`u-text-editor` keeps its border under a document-wide CSS reset** (Tailwind's preflight and the like): the box —
+  border, rounded corners, background — is now a new `base` part inside the shadow root, where a document rule cannot
+  reach it. A height given to the host still sizes the editing area. Style the box with `::part(base)`.
+
 ### Documentation
 
 - `u-text-editor`: the README and the skill reference say how to treat the HTML value when rendering it outside the
