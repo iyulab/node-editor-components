@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- **`u-code-editor`'s header title wraps instead of ending in «…».** A long `label` was cut with no way to read the rest.
+
 - **`u-text-editor` keeps its border under a document-wide CSS reset** (Tailwind's preflight and the like): the box —
   border, rounded corners, background — is now a new `base` part inside the shadow root, where a document rule cannot
   reach it. A height given to the host still sizes the editing area. Style the box with `::part(base)`.

@@ -30,9 +30,8 @@ export const styles = css`
       font-size: 16px;
       line-height: 20px;
       font-weight: 600;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
 
     .flex {
