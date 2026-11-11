@@ -1,7 +1,7 @@
 {
   "name": "@iyulab/editor-components",
   "description": "Rich-text editor web components",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "keywords": [
     "iyulab",
     "web-components",
@@ -80,7 +80,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@iyulab/components": "^2.19.0",
+    "@iyulab/components": "^3.0.0",
     "@types/node": "^26.1.1",
     "@vitest/browser-playwright": "^5.0.0",
     "eslint": "^10.1.0",
