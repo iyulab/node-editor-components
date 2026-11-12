@@ -45,6 +45,11 @@ export const styles = css`
     min-height: 0;
     width: 100%;
     overflow: hidden;
+    /* The editing area is code, and the engine lays its lines out for left-to-right text (it does not isolate itself): under a
+       right-to-left page its lines are positioned far outside the view and the punctuation at the end of a line moves. Only
+       this box is pinned — the header and the message below it follow the page. */
+    direction: ltr;
+    unicode-bidi: isolate;
 
     main {
       width: 100%;

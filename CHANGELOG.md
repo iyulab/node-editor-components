@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- **`u-code-editor` keeps its left-to-right order in a right-to-left page.** The editing engine lays its lines out for left-to-right
+  text and does not isolate itself, so under a right-to-left page the lines were positioned far outside the view and the punctuation at
+  the end of a line moved. The editing box is now pinned to left to right; the header and the validation message below it still follow
+  the page. A left-to-right page is drawn as before.
+
 ## [0.8.1] - 2026-11-11
 
 ### Fixed
