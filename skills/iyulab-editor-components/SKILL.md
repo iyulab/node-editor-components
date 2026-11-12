@@ -44,3 +44,7 @@ import '@iyulab/editor-components/dist/components/text-editor/UTextEditor.js';
 |-------|--------|--------|--------------|
 | `change` | `u-code-editor` | none (plain `Event`) | User edit in the Monaco editor |
 | `change` | `u-text-editor` | `{ html, text, delta }` | User edit in the Quill editor |
+
+## Machine-readable reference
+
+The element surface is also published as a Custom Elements Manifest: the file named by the `customElements` field of this package's `package.json` (`dist/custom-elements.json`). It lists every element's attributes, properties, events (with the type of their `detail`), slots, CSS parts and CSS custom properties, generated from the source at build time. Read it instead of parsing the source when you need the exact surface of an element.

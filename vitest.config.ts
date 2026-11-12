@@ -13,6 +13,10 @@ export default defineConfig({
   test: {
     projects: [
       {
+        // Node 에서 도는 소스 검사 — 매니페스트가 소스와 같은 말을 하는가(분석기 CLI 를 돌린다). 요소 자체의 시험은 아래 브라우저 프로젝트다.
+        test: { name: 'unit', include: ['tests/manifest/**/*.test.ts'], environment: 'node' },
+      },
+      {
         // 인라인 프로젝트는 루트 설정을 상속하지 않는다 — 위 plugins 가 이 프로젝트의 dev 서버에도
         // 실리도록 명시한다(없으면 `virtual:monaco-structure-css` 를 해석하지 못한다, 실측).
         extends: true,

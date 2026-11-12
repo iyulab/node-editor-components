@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- **`custom-elements.json` — a Custom Elements Manifest for every element.** The package ships `dist/custom-elements.json`
+  (`@iyulab/editor-components/dist/custom-elements.json`, declared in the `customElements` field of `package.json`) so editors,
+  documentation tools and AI agents can read each element's attributes, properties, events, slots and CSS parts without
+  parsing the source. It is generated at build time (`npm run analyze`) and lists the events an element raises through
+  `this.fire()` or `dispatchEvent()` with the type of their `detail`.
+
 ### Fixed
 
 - **`u-code-editor` keeps its left-to-right order in a right-to-left page.** The editing engine lays its lines out for left-to-right
