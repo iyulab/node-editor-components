@@ -11,6 +11,7 @@ import { UFormControlElement } from "@iyulab/components/dist/components/UFormCon
 import { Locale } from "@iyulab/components/dist/utilities/Locale.js";
 import { styles } from './UCodeEditor.styles.js';
 import { editorLocale } from '../../locale.js';
+import { enumeratedValues } from "@iyulab/components/dist/utilities/enumerated.js";
 
 /**
  * code editor component used by monaco-editor
@@ -24,6 +25,12 @@ import { editorLocale } from '../../locale.js';
  */
 @customElement("u-code-editor")
 export class UCodeEditor extends UFormControlElement<string> {
+  /** 목록 밖의 값은 어떤 규칙에도 안 걸려 조용히 기본 모양이 된다 — 개발 모드에서 한 번 알린다(`UElement.enumerated`). */
+  static override enumerated = {
+    ...super.enumerated,
+    theme: enumeratedValues<"light" | "dark">()(['light', 'dark']),
+  };
+
   static styles = [ super.styles, unsafeCSS(monacoStyles), styles ];
 
   /** Specifies whether the header should be displayed or not. @default false */
