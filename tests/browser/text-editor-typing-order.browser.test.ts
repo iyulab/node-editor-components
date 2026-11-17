@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import '../../src/components/text-editor/UTextEditor.js';
+import { IS_MAC } from './modifier';
 
 /**
  * Typing into `u-text-editor` keeps the order of what was typed. The editor mirrors Quill's HTML into `value`, and a
@@ -53,7 +54,8 @@ describe('u-text-editor — typed characters stay in the order they were typed',
   it('an editor that starts with content (control)', async () => {
     const { el, area } = await mount('<p>Hi</p>');
     await userEvent.click(area);
-    await userEvent.keyboard('{End}');
+    // 줄 끝으로 — macOS 의 End 는 캐럿을 옮기지 않고 스크롤하므로 ⌘→ 로 간다
+    await userEvent.keyboard(IS_MAC ? '{Meta>}{ArrowRight}{/Meta}' : '{End}');
     await typeEach('abc');
     expect(el.value).toBe('<p>Hiabc</p>');
   });

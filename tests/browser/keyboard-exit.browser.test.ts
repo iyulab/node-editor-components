@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import '../../src/components/text-editor/UTextEditor.js';
 import '../../src/components/code-editor/UCodeEditor.js';
+import { IS_MAC } from './modifier';
 
 /**
  * SC 2.1.2 No Keyboard Trap — the keyboard can leave both editors, pressed with real keys.
@@ -73,7 +74,8 @@ describe('u-code-editor — keyboard exit', () => {
   it('Ctrl+M switches Tab to moving the focus — the documented way out', async () => {
     const el = await mountCode();
     expect(active()).toBe(el);
-    await userEvent.keyboard('{Control>}m{/Control}');
+    // Monaco 의 «Tab 이 포커스를 옮긴다» 전환 — macOS 는 Ctrl+Shift+M (문서가 안내하는 그대로)
+    await userEvent.keyboard(IS_MAC ? '{Control>}{Shift>}m{/Shift}{/Control}' : '{Control>}m{/Control}');
     await sleep(80);
     await userEvent.keyboard('{Tab}');
     await sleep(80);
